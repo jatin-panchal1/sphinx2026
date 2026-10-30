@@ -108,8 +108,9 @@ class FairnessAuditor:
         if len(result) > 1:
             max_ar = result["approval_rate"].max()
             min_ar = result["approval_rate"].min()
-            ar_gap = max_ar - min_ar
-            result["bias_alert_flag"] = ar_gap > 0.10
+            ar_gap = float(max_ar - min_ar)
+            # Cast to Python bool to avoid numpy.bool_ serialisation errors
+            result["bias_alert_flag"] = bool(ar_gap > 0.10)
 
         return result
 
@@ -168,7 +169,7 @@ class FairnessAuditor:
             "ratio": float(ratio),
             "advantaged_group": str(group_metrics.loc[max_idx, "group_value"]),
             "disadvantaged_group": str(group_metrics.loc[min_idx, "group_value"]),
-            "alert": ratio < 0.8,
+            "alert": bool(ratio < 0.8),
         }
 
     # ------------------------------------------------------------------
@@ -390,7 +391,20 @@ class FairnessAuditor:
         # Serialise group_metrics DataFrames to dicts for JSON compatibility
         group_metrics_serialised: dict[str, list[dict]] = {}
         for col, df in group_metrics.items():
-            group_metrics_serialised[col] = df.to_dict(orient="records")
+            records = df.to_dict(orient="records")
+            # Coerce any remaining numpy scalars to native Python types
+            clean_records = []
+            for rec in records:
+                clean_rec = {}
+                for k, v in rec.items():
+                    if isinstance(v, (bool,)) or type(v).__name__ == "bool_":
+                        clean_rec[k] = bool(v)
+                    elif hasattr(v, "item"):  # numpy scalar
+                        clean_rec[k] = v.item()
+                    else:
+                        clean_rec[k] = v
+                clean_records.append(clean_rec)
+            group_metrics_serialised[col] = clean_records
 
         return {
             "group_metrics": group_metrics_serialised,

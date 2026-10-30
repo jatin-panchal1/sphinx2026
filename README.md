@@ -43,7 +43,7 @@ flowchart LR
 | :--- | :--- |
 | **Granular Consent Manager** | Explicit, purpose-limited consent per data category with verifiable audit receipt. Prevents score generation without minimum required data coverage. |
 | **Alternative Feature Pipeline** | Transforms unstructured alternative signals into 25 normalized features: payment reliability, cash-flow stability, expense burden, business continuity, and data completeness. |
-| **High-Precision ML Scoring** | Gradient Boosting Classifier achieving **AUC-ROC > 0.99**, calibrated to a 300–900 credit score with risk grades (A–E) and confidence indicators. |
+| **High-Precision ML Scoring** | Gradient Boosting Classifier achieving **AUC-ROC > 0.99** on synthetic data (note: inflated due to label circularity with features — see `docs/TECHNICAL_AUDIT.md`), calibrated to a 300–900 credit score with risk grades (A–E) and confidence indicators. |
 | **SHAP Explainability** | Unpacks "black-box" predictions into top positive drivers (e.g. on-time rent, low volatility) and negative flags (e.g. high expense ratio, seasonal dips) with plain-language summaries. |
 | **Fairness & Bias Audit Panel** | Real-time monitoring across Demographic Slices (Urban/Rural, Gender, Age, Occupation, Region). Detects Disparate Impact (four-fifths rule), False Rejection Rate (FRR) disparities, and missing data penalties. |
 | **Decision Support Engine** | Rule-assisted recommendations: *Approve*, *Approve with Reduced Limit*, *Manual Review*, or *Decline* with dynamic threshold tuning. |
@@ -63,21 +63,61 @@ flowchart LR
 
 ## ⚡ Quickstart Guide
 
-### 1. Set Active Workspace
-If you are developing or testing in Antigravity or your terminal, navigate to the project directory:
+### Prerequisites
+
+- Python 3.10+ (tested on Python 3.14.6)
+- All dependencies installable via pip (no conda required)
+- **Note:** `matplotlib` is not required for the backend; it is excluded from requirements on Python 3.14.
+
+### 1. Install Dependencies
+
 ```bash
-cd /home/jatin/.gemini/antigravity/scratch/fairscore
+pip install -r requirements.txt
 ```
 
-### 2. Virtual Environment
-The virtual environment is already prepared with all dependencies:
-```bash
-source venv/bin/activate
+> **Windows note:** If you get a `UnicodeEncodeError` when running scripts with emoji output, set:
+> ```powershell
+> $env:PYTHONIOENCODING = "utf-8"
+> ```
+
+---
+
+### 2. Start Backend & Frontend
+
+#### Windows (PowerShell) — Recommended
+
+**Terminal 1 — FastAPI Server (Port 8000):**
+```powershell
+.\run_api.ps1
+# API docs at http://localhost:8000/docs
 ```
 
-### 3. Start Backend & Frontend
+**Terminal 2 — Streamlit Frontend (Port 8501):**
+```powershell
+.\run_app.ps1
+# Open http://localhost:8501 in your browser
+```
 
-#### Terminal 1 — FastAPI Server (Port 8000):
+#### Linux / macOS (Bash)
+
+**Terminal 1:**
+```bash
+./run_api.sh
+```
+
+**Terminal 2:**
+```bash
+./run_app.sh
+```
+
+#### Manual Start (any platform)
+```bash
+# Backend
+python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Frontend (separate terminal)
+python -m streamlit run app/streamlit_app.py --server.port 8501
+```
 ```bash
 ./run_api.sh
 # Accessible at http://localhost:8000 (Swagger docs at http://localhost:8000/docs)
@@ -93,14 +133,28 @@ source venv/bin/activate
 
 ## 🧪 Testing & Verification
 
-Run the end-to-end integration test suite verifying all 11 core functional requirements:
-```bash
-venv/bin/python tests/run_tests.py
+Run the full pytest integration suite (12 tests, all must pass):
+```powershell
+# Windows
+$env:PYTHONIOENCODING = "utf-8"
+python -m pytest tests/test_fairscore.py -v
 ```
 
-Run the live 6-scene hackathon demo walkthrough:
 ```bash
-venv/bin/python tests/test_demo_script.py
+# Linux/macOS
+python -m pytest tests/test_fairscore.py -v
+```
+
+Run the in-memory functional test suite (11 modules):
+```powershell
+$env:PYTHONIOENCODING = "utf-8"
+python tests/run_tests.py
+```
+
+Run the 6-scene hackathon demo walkthrough:
+```powershell
+$env:PYTHONIOENCODING = "utf-8"
+python tests/test_demo_script.py
 ```
 
 ---

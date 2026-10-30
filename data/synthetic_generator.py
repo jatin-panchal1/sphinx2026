@@ -386,18 +386,23 @@ def _compute_default_probability(
     persona_bias: float,
     gender: str,
 ) -> float:
-    """Deterministic default probability from financial signals.
+    """Compute a default probability from financial behaviour signals.
+
+    Only financial behaviour signals are used. Demographic attributes such as
+    gender are explicitly excluded to avoid encoding protected-attribute bias
+    into training labels.
+
+    Missing data is treated as informative uncertainty, not as evidence of poor
+    creditworthiness. When a data source is absent the corresponding signals
+    simply do not contribute to the score rather than adding a penalty.
 
     Factors that *increase* risk:
         - missed_payments, late_payments
         - income_volatility
-        - expense_to_income_ratio
+        - expense_to_income_ratio > 0.5
         - zero_income_weeks
         - low savings_deposit_frequency
-        - low rent_payment_stability
-        - low bill_stability
-
-    Built-in bias: Women get a slight discipline bonus (-0.03).
+        - low rent_payment_stability / bill_stability
     """
     score = 0.0
     n_signals = 0
@@ -410,19 +415,14 @@ def _compute_default_probability(
         score += missed_ratio * 0.8 + late_ratio * 0.3
         score += (1 - rent["rent_payment_stability"]) * 0.5
         n_signals += 3
-    else:
-        # Missing rent data adds small uncertainty penalty
-        score += 0.15
-        n_signals += 1
+    # Missing rent: no penalty — data simply not used
 
     # --- Utility signals ---
     if utility is not None:
         score += (1 - utility["bill_stability"]) * 0.4
         score += utility["disconnection_events"] * 0.12
         n_signals += 2
-    else:
-        score += 0.12
-        n_signals += 1
+    # Missing utility: no penalty
 
     # --- Cash-flow signals ---
     if cashflow is not None:
@@ -431,9 +431,7 @@ def _compute_default_probability(
         score += (cashflow["zero_income_weeks"] / 12) * 0.5
         score += (1 - min(cashflow["savings_deposit_frequency"] / 4, 1.0)) * 0.4
         n_signals += 4
-    else:
-        score += 0.20
-        n_signals += 1
+    # Missing cashflow: no penalty
 
     # --- Mobile signals ---
     if mobile is not None:
@@ -449,16 +447,21 @@ def _compute_default_probability(
         score += (1 - business["collection_consistency"]) * 0.2
         n_signals += 3
 
-    # Normalise by number of signals so the probability stays in [0, 1]
+    # Normalise by number of signals so the probability stays in [0, 1].
+    # If no signals are present (completely thin file), default to a neutral
+    # base rate with no additional penalty.
     if n_signals > 0:
         prob = score / n_signals
+    else:
+        prob = 0.35  # neutral base rate for completely thin files
 
-    # Apply persona bias
+    # Apply persona-level behavioral bias (reflects financial discipline archetype,
+    # NOT demographic characteristics)
     prob += persona_bias
 
-    # Gender bias: women slightly better payment discipline
-    if gender == "Female":
-        prob -= 0.03
+    # NOTE: gender and other protected attributes are intentionally NOT used here.
+    # The _ prefix on `gender` is kept for API compatibility but the variable
+    # is not read.
 
     return _clamp(prob, 0.0, 1.0)
 

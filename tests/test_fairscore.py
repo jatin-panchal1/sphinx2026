@@ -71,8 +71,13 @@ def test_model_metrics(client):
 
 
 def test_fairness_summary_and_bias_alerts(client):
-    """FR-21 to FR-26, FR-31: Test fairness metrics and bias detection."""
+    """FR-21 to FR-26, FR-31: Test fairness metrics and bias detection.
+
+    This test also verifies that no numpy.bool_ serialisation crash occurs
+    (P0.2 fix).
+    """
     response = client.get("/api/fairness")
+    # Must be 200 — not 500 from numpy.bool_ serialisation error
     assert response.status_code == 200
     data = response.json()
     assert "group_metrics" in data
@@ -96,6 +101,132 @@ def test_fairness_summary_and_bias_alerts(client):
     di = data["disparate_impact"]
     assert "urban_rural" in di
     assert "ratio" in di["urban_rural"]
+
+    # Verify bias_alert_flag is a Python bool, not numpy.bool_
+    for group_list in gm.values():
+        for record in group_list:
+            if "bias_alert_flag" in record:
+                assert isinstance(record["bias_alert_flag"], bool), (
+                    f"bias_alert_flag must be Python bool, got {type(record['bias_alert_flag'])}"
+                )
+
+    # Verify disparate impact alert is a Python bool
+    for di_val in di.values():
+        if "alert" in di_val:
+            assert isinstance(di_val["alert"], bool), (
+                f"disparate impact alert must be Python bool, got {type(di_val['alert'])}"
+            )
+
+
+def test_score_without_consent(client):
+    """FR-05: Scoring must be rejected (HTTP 403) when no consent has been submitted."""
+    # Create a new applicant but do NOT submit consent
+    create_payload = {
+        "age_group": "26-35",
+        "gender_category": "Male",
+        "region_category": "North",
+        "urban_rural": "Urban",
+        "occupation_type": "Gig Worker",
+        "income_type": "Weekly",
+        "loan_amount_requested": 35000.0,
+        "loan_tenure_months": 12,
+    }
+    create_res = client.post("/api/applicant", json=create_payload)
+    assert create_res.status_code == 200
+    app_id = create_res.json()["applicant_id"]
+
+    # Score attempt without consent must be rejected
+    score_res = client.post("/api/score", json={"applicant_id": app_id})
+    assert score_res.status_code == 403, (
+        f"Expected HTTP 403 for unconsented applicant, got {score_res.status_code}: "
+        f"{score_res.text}"
+    )
+
+
+def test_score_with_insufficient_consent(client):
+    """FR-05: Scoring must be rejected (HTTP 403) when fewer than 2 categories consented."""
+    # Create applicant
+    create_payload = {
+        "age_group": "18-25",
+        "gender_category": "Female",
+        "region_category": "South",
+        "urban_rural": "Urban",
+        "occupation_type": "Student",
+        "income_type": "Monthly",
+        "loan_amount_requested": 25000.0,
+        "loan_tenure_months": 6,
+    }
+    create_res = client.post("/api/applicant", json=create_payload)
+    assert create_res.status_code == 200
+    app_id = create_res.json()["applicant_id"]
+
+    # Submit only 1 category of consent (insufficient)
+    insuf_consent = {
+        "applicant_id": app_id,
+        "rent_data": True,
+        "utility_data": False,
+        "mobile_data": False,
+        "cashflow_data": False,
+        "business_data": False,
+        "self_declared_income": False,
+    }
+    consent_res = client.post("/api/consent", json=insuf_consent)
+    assert consent_res.status_code == 200
+    assert not consent_res.json()["sufficient_data"]
+
+    # Score attempt must be rejected
+    score_res = client.post("/api/score", json={"applicant_id": app_id})
+    assert score_res.status_code == 403, (
+        f"Expected HTTP 403 for insufficient consent, got {score_res.status_code}: "
+        f"{score_res.text}"
+    )
+
+
+def test_consent_withdrawal_blocks_scoring(client):
+    """FR-07: Scoring must be blocked after consent withdrawal."""
+    # Create applicant
+    create_payload = {
+        "age_group": "36-45",
+        "gender_category": "Male",
+        "region_category": "West",
+        "urban_rural": "Semi-Urban",
+        "occupation_type": "Small Shopkeeper",
+        "income_type": "Daily",
+        "loan_amount_requested": 75000.0,
+        "loan_tenure_months": 18,
+    }
+    create_res = client.post("/api/applicant", json=create_payload)
+    assert create_res.status_code == 200
+    app_id = create_res.json()["applicant_id"]
+
+    # Submit sufficient consent
+    consent_payload = {
+        "applicant_id": app_id,
+        "rent_data": True,
+        "utility_data": True,
+        "mobile_data": True,
+        "cashflow_data": True,
+        "business_data": False,
+        "self_declared_income": False,
+    }
+    consent_res = client.post("/api/consent", json=consent_payload)
+    assert consent_res.status_code == 200
+    assert consent_res.json()["sufficient_data"]
+
+    # Score should succeed
+    score_res = client.post("/api/score", json={"applicant_id": app_id})
+    assert score_res.status_code == 200
+
+    # Now withdraw consent
+    from api.main import consent_manager
+    consent_manager.withdraw_consent(app_id)  # withdraw all
+
+    # Score attempt after withdrawal must be rejected
+    score_res2 = client.post("/api/score", json={"applicant_id": app_id})
+    assert score_res2.status_code == 403, (
+        f"Expected HTTP 403 after consent withdrawal, got {score_res2.status_code}: "
+        f"{score_res2.text}"
+    )
 
 
 def test_applicant_creation_and_consent_scoring_workflow(client):
@@ -162,6 +293,13 @@ def test_applicant_creation_and_consent_scoring_workflow(client):
     assert len(score_data["positive_factors"]) >= 1
     assert len(score_data["summary_text"]) > 10
 
+    # 5b. Verify summary text uses the actual score (not hardcoded 700)
+    actual_score = score_data["score"]
+    assert str(actual_score) in score_data["summary_text"], (
+        f"summary_text should contain actual score {actual_score}, "
+        f"got: {score_data['summary_text']}"
+    )
+
     # 6. Retrieve SHAP explanation
     expl_res = client.get(f"/api/explanation/{app_id}")
     assert expl_res.status_code == 200
@@ -198,3 +336,19 @@ def test_thresholds_update(client):
     data = response.json()
     assert "thresholds" in data
     assert data["thresholds"]["approve_max_default_prob"] == 0.18
+
+
+def test_fairness_http_serialization_no_crash(client):
+    """P0.2 regression: GET /api/fairness must return HTTP 200, never 500.
+
+    Verifies that numpy.bool_ values in bias_alert_flag and disparate impact
+    alert fields are correctly serialised to Python booleans.
+    """
+    response = client.get("/api/fairness")
+    assert response.status_code == 200, (
+        f"GET /api/fairness returned {response.status_code}: {response.text}"
+    )
+    data = response.json()
+    # Validate no raw numpy types leak through — JSON should be fully serialisable
+    import json
+    json.dumps(data)  # will raise if any non-serialisable type present

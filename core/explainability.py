@@ -124,11 +124,13 @@ class ExplainabilityEngine:
     # Local (single-applicant) explanation
     # ------------------------------------------------------------------
 
-    def explain_single(self, features) -> dict:
+    def explain_single(self, features, score: int = 0, risk_grade: str = "Unknown") -> dict:
         """Explain a single applicant's prediction.
 
         Args:
             features: A single-row DataFrame, Series, or dict with feature columns.
+            score: The applicant's credit score (300–900). Used in summary text.
+            risk_grade: The applicant's risk grade (e.g. "A"–"E"). Used in summary text.
 
         Returns:
             Dictionary with keys:
@@ -184,8 +186,8 @@ class ExplainabilityEngine:
         ]
 
         summary_text = self.generate_summary_text(
-            score=700,
-            risk_grade="Estimated",
+            score=score,
+            risk_grade=risk_grade,
             positive_factors=positive_factors,
             negative_factors=negative_factors,
         )

@@ -10,7 +10,7 @@ import os
 import uuid
 import logging
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
@@ -230,6 +230,26 @@ PERSONAS = [
 def _applicant_id_in_synthetic(applicant_id: str) -> bool:
     """Check whether an applicant_id belongs to the pre-generated dataset."""
     return features_df is not None and applicant_id in features_df["applicant_id"].values
+
+
+def _dp_to_recommendation(default_probability: float) -> str:
+    """Map a default probability to a recommendation string using the DecisionEngine thresholds.
+
+    Falls back to fixed thresholds if the decision engine is not yet initialised.
+    """
+    if decision_engine is not None:
+        approve_thresh = decision_engine.thresholds.get("approve_max_default_prob", 0.25)
+        review_thresh = decision_engine.thresholds.get("review_max_default_prob", 0.50)
+    else:
+        approve_thresh = 0.25
+        review_thresh = 0.50
+
+    if default_probability <= approve_thresh:
+        return "Approve"
+    elif default_probability <= review_thresh:
+        return "Manual Review"
+    else:
+        return "Decline"
 
 
 def _get_applicant_profile(applicant_id: str) -> dict:
@@ -473,7 +493,7 @@ async def list_applicants(
             continue
 
         dp = pred.get("default_probability", 0.5)
-        rec = "Approve" if dp <= 0.2 else ("Approve (Reduced Limit)" if dp <= 0.35 else ("Manual Review" if dp <= 0.5 else "Decline"))
+        rec = _dp_to_recommendation(dp)
         records.append(
             {
                 "applicant_id": app_id,
@@ -542,7 +562,7 @@ async def submit_consent(consent: ConsentSubmit) -> ConsentResponse:
 
     consented = [k.replace("_data", "").replace("_", " ").title() for k, v in consent_dict.items() if v]
     sufficient = result.get("sufficient_data", len(consented) >= 2)
-    timestamp = result.get("timestamp", datetime.utcnow().isoformat())
+    timestamp = result.get("timestamp", datetime.now(timezone.utc).isoformat())
 
     msg = "Consent recorded." if sufficient else "Consent recorded, but more data categories are recommended for a reliable score."
 
@@ -598,6 +618,39 @@ async def generate_score(request: ScoreRequest) -> ScoreResponse:
             detail=f"No consent found for {app_id}. Submit consent first via POST /api/consent.",
         )
 
+    # Explicit consent gate: status must be "active" and sufficient_data must be True
+    _consent_status_val = consent_status.get("status", "not_submitted")
+    _sufficient = consent_status.get("sufficient_data", False)
+
+    if _consent_status_val == "not_submitted":
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                f"Applicant {app_id} has not submitted consent. "
+                "Scoring requires explicit consent with at least 2 data categories. "
+                "Submit consent via POST /api/consent first."
+            ),
+        )
+
+    if _consent_status_val == "revoked":
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                f"Consent for applicant {app_id} has been withdrawn. "
+                "Scoring cannot proceed without active consent."
+            ),
+        )
+
+    if not _sufficient:
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                f"Insufficient consent for applicant {app_id}. "
+                "At least 2 data categories must be consented for alternative credit scoring. "
+                "Update consent via POST /api/consent."
+            ),
+        )
+
     # Determine data coverage from consent
     consent_categories = consent_status.get("categories", [])
     if isinstance(consent_status, dict):
@@ -639,10 +692,12 @@ async def generate_score(request: ScoreRequest) -> ScoreResponse:
 
     score = int(pred.get("score", 500))
     default_prob = float(pred.get("default_probability", 0.5))
+    # Compute grade here so it can be passed to the explainer
+    risk_grade = _risk_grade_from_score(score)
 
     # --- 4. Explain -------------------------------------------------------
     try:
-        explanation = explainer.explain_single(feature_values)
+        explanation = explainer.explain_single(feature_values, score=score, risk_grade=risk_grade)
     except Exception as exc:
         logger.warning("Explanation generation failed for %s: %s", app_id, exc)
         explanation = {
@@ -659,7 +714,6 @@ async def generate_score(request: ScoreRequest) -> ScoreResponse:
     negative_factors = explanation.get("negative_factors", [])
 
     # --- 5. Decision engine -----------------------------------------------
-    risk_grade = _risk_grade_from_score(score)
     confidence = _confidence_label(data_coverage)
     expense_ratio = float(feature_values.get("expense_to_income_ratio", 0.5))
     
@@ -691,9 +745,6 @@ async def generate_score(request: ScoreRequest) -> ScoreResponse:
             "flags": [],
         }
 
-    risk_grade = _risk_grade_from_score(score)
-    confidence = _confidence_label(data_coverage)
-
     summary_parts = [f"FairScore: {score} (Grade {risk_grade})."]
     if positive_factors:
         top_pos = positive_factors[0].get("feature", "payment history")
@@ -720,6 +771,27 @@ async def generate_score(request: ScoreRequest) -> ScoreResponse:
     )
 
     score_results_cache[app_id] = result.model_dump()
+
+    # Audit log — append JSON event to data/audit_log.jsonl
+    try:
+        audit_entry = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "applicant_id": app_id,
+            "score": score,
+            "default_probability": round(default_prob, 4),
+            "risk_grade": risk_grade,
+            "recommendation": decision.get("recommendation", "Review"),
+            "data_coverage": round(data_coverage, 4),
+            "consent_categories": consent_categories,
+            "model_version": "1.0.0",
+        }
+        _audit_log_path = os.path.join(_PROJECT_ROOT, "data", "audit_log.jsonl")
+        os.makedirs(os.path.dirname(_audit_log_path), exist_ok=True)
+        with open(_audit_log_path, "a", encoding="utf-8") as _af:
+            import json as _json
+            _af.write(_json.dumps(audit_entry) + "\n")
+    except Exception as _ae:
+        logger.warning("Audit log write failed: %s", _ae)
 
     return result
 
@@ -859,7 +931,9 @@ async def get_dashboard_summary() -> DashboardSummaryResponse:
     for grade in ["A", "B", "C", "D", "E"]:
         grade_preds = [p for p in predictions_cache.values() if _risk_grade_from_score(p.get("score", 0)) == grade]
         if grade_preds:
-            appr = sum(1 for p in grade_preds if p.get("default_probability", 0.5) <= 0.3) / len(grade_preds)
+            # Use decision-engine threshold for consistency
+            _approve_thresh = decision_engine.thresholds.get("approve_max_default_prob", 0.25) if decision_engine else 0.25
+            appr = sum(1 for p in grade_preds if p.get("default_probability", 0.5) <= _approve_thresh) / len(grade_preds)
             approval_by_grade[grade] = round(appr * 100, 1)
         else:
             approval_by_grade[grade] = 0.0
@@ -868,15 +942,17 @@ async def get_dashboard_summary() -> DashboardSummaryResponse:
         grade = _risk_grade_from_score(s)
         risk_dist[grade] += 1
 
-    # Approval / review / decline counts
+    # Approval / review / decline counts — use decision-engine thresholds
+    _approve_thresh = decision_engine.thresholds.get("approve_max_default_prob", 0.25) if decision_engine else 0.25
+    _review_thresh = decision_engine.thresholds.get("review_max_default_prob", 0.50) if decision_engine else 0.50
     approve_count = 0
     review_count = 0
     decline_count = 0
     for p in predictions_cache.values():
         dp = p.get("default_probability", 0.5)
-        if dp <= 0.3:
+        if dp <= _approve_thresh:
             approve_count += 1
-        elif dp <= 0.6:
+        elif dp <= _review_thresh:
             review_count += 1
         else:
             decline_count += 1
@@ -978,21 +1054,21 @@ async def update_thresholds(thresholds: ThresholdUpdate) -> dict:
     updated: dict[str, float] = {}
 
     if thresholds.approve_max_default_prob is not None:
-        decision_engine.approve_max_default_prob = thresholds.approve_max_default_prob
+        decision_engine.thresholds["approve_max_default_prob"] = thresholds.approve_max_default_prob
         updated["approve_max_default_prob"] = thresholds.approve_max_default_prob
 
     if thresholds.review_max_default_prob is not None:
-        decision_engine.review_max_default_prob = thresholds.review_max_default_prob
+        decision_engine.thresholds["review_max_default_prob"] = thresholds.review_max_default_prob
         updated["review_max_default_prob"] = thresholds.review_max_default_prob
 
     if thresholds.min_data_coverage is not None:
-        decision_engine.min_data_coverage = thresholds.min_data_coverage
+        decision_engine.thresholds["min_data_coverage"] = thresholds.min_data_coverage
         updated["min_data_coverage"] = thresholds.min_data_coverage
 
     if not updated:
         return {"message": "No thresholds updated (no values provided)."}
 
-    return {"message": "Thresholds updated successfully.", "updated": updated}
+    return {"message": "Thresholds updated successfully.", "thresholds": updated, "updated": updated}
 
 
 # ---- Personas ------------------------------------------------------------
@@ -1016,8 +1092,9 @@ async def list_personas() -> list:
 async def health_check() -> dict:
     """Liveness probe."""
     return {
-        "status": "healthy",
+        "status": "ok",
+        "version": "1.0.0",
         "model_loaded": model is not None,
         "dataset_size": len(predictions_cache),
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
