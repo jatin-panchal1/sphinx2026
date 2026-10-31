@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FairScore — Alternative Credit Scoring Platform</title>
+  
+  <!-- Typography: Geist (headers, metrics) & Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+  
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'canvas': '#F7F5EE',
+            'surface': '#FFFFFF',
+            'surface-subtle': '#F2F0E6',
+            'border-subtle': '#E4E8E1',
+            'border-focus': '#72917B',
+            'primary-forest': '#245B45',
+            'primary-spruce': '#173D30',
+            'primary-sage': '#72917B',
+            'charcoal': '#242B27',
+            'slate-muted': '#77817A',
+            'prime-green': '#287A50',
+            'caution-amber': '#B77925',
+            'adversity-red': '#B64D4D'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Geist', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* OpenType Tabular Figures for Financial Precision */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    
+    /* Custom Scrollbar for clean aesthetics */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F7F5EE;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D2DDD4;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #72917B;
+    }
+
+    /* Motion utility classes */
+    .view-transition {
+      transition: opacity 240ms cubic-bezier(0.16, 1, 0.3, 1), transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      .view-transition {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-canvas text-charcoal font-sans antialiased min-h-screen flex flex-col selection:bg-primary-sage/30">
+
+  <!-- ========================================================================= -->
+  <!-- GLOBAL HEADER (Consistent 64px bar across all portals)                     -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border-subtle shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Mission Indicator -->
+      <div class="flex items-center gap-3">
+        <a href="#public" onclick="switchPortal('public'); return false;" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 rounded-lg bg-primary-forest flex items-center justify-center text-white shadow-sm group-hover:bg-primary-spruce transition-colors">
+            <i data-lucide="scale" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <div class="font-display font-bold text-lg text-primary-spruce leading-none tracking-tight">FairScore</div>
+            <div class="text-[10px] font-semibold text-slate-muted uppercase tracking-wider">Alternative Credit</div>
+          </div>
+        </a>
+        <span class="hidden md:inline-flex items-center gap-1.5 ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#EAF2ED] text-prime-green border border-[#C9DECE]">
+          <span class="w-1.5 h-1.5 rounded-full bg-prime-green animate-pulse"></span>
+          RBI Sandbox Compliant
+        </span>
+      </div>
+
+      <!-- Portal Navigation Switcher -->
+      <nav class="flex items-center bg-canvas p-1 rounded-lg border border-border-subtle">
+        <button id="nav-btn-public" onclick="switchPortal('public')" 
+          class="px-3.5 py-1.5 rounded-md text-xs font-medium transition-all text-charcoal bg-white shadow-sm font-semibold">
+          Public Website
+        </button>
+        <button id="nav-btn-applicant" onclick="switchPortal('applicant')" 
+          class="px-3.5 py-1.5 rounded-md text-xs font-medium transition-all text-slate-muted hover:text-charcoal">
+          Applicant Portal
+        </button>
+        <button id="nav-btn-lender" onclick="switchPortal('lender')" 
+          class="px-3.5 py-1.5 rounded-md text-xs font-medium transition-all text-slate-muted hover:text-charcoal">
+          Lender Underwriting Desk
+        </button>
+      </nav>
+
+      <!-- Right Controls: Backend Health Status & Quick Action -->
+      <div class="flex items-center gap-3">
+        <div id="backend-status-pill" class="hidden sm:flex items-center gap-1.5 text-xs text-slate-muted bg-canvas px-2.5 py-1 rounded-md border border-border-subtle">
+          <span id="backend-dot" class="w-2 h-2 rounded-full bg-prime-green"></span>
+          <span id="backend-text">API Online</span>
+        </div>
+        <button onclick="handleQuickAction()" class="px-3 py-1.5 text-xs font-semibold rounded-md bg-primary-forest text-white hover:bg-primary-spruce transition-colors shadow-sm flex items-center gap-1.5">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>Score Applicant</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- PORTAL 1: PUBLIC WEBSITE & METHODOLOGY                                    -->
+  <!-- ========================================================================= -->
+  <main id="portal-public" class="portal-view flex-1 flex flex-col">
+    
+    <!-- Hero Section -->
+    <section class="py-14 sm:py-20 bg-gradient-to-b from-white to-canvas border-b border-border-subtle">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div class="lg:col-span-7 space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-canvas text-primary-forest border border-border-subtle">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-primary-forest"></i>
+              <span>Financial Inclusion Powered by Explainable AI</span>
+            </div>
+            
+            <h1 class="font-display text-4xl sm:text-5xl font-bold tracking-tight text-primary-spruce leading-[1.15]">
+              Your financial reliability deserves to be seen.
+            </h1>
+            
+            <p class="text-base sm:text-lg text-slate-muted max-w-2xl leading-relaxed">
+              Traditional credit bureaus reject millions of creditworthy individuals simply because they lack an existing debt history. FairScore evaluates consented alternative signals—rent regularity, utility discipline, and cash-flow consistency—to deliver transparent, fair credit access.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4 pt-2">
+              <button onclick="switchPortal('applicant'); showApplicantStep(1);" class="px-5 py-3 rounded-lg bg-primary-forest text-white text-sm font-semibold hover:bg-primary-spruce transition-all shadow-sm flex items-center gap-2">
+                <span>Check Your FairScore</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+              <button onclick="switchPortal('lender')" class="px-5 py-3 rounded-lg bg-white text-charcoal border border-border-subtle text-sm font-medium hover:bg-canvas transition-colors shadow-sm flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-primary-forest"></i>
+                <span>Enter Underwriting Desk</span>
+              </button>
+            </div>
+
+            <!-- Key Proof Points -->
+            <div class="grid grid-cols-3 gap-6 pt-6 border-t border-border-subtle max-w-lg">
+              <div>
+                <div class="font-display text-2xl font-bold text-primary-forest tabular-nums">1.4B+</div>
+                <div class="text-xs text-slate-muted font-medium">Credit Invisible Globally</div>
+              </div>
+              <div>
+                <div class="font-display text-2xl font-bold text-primary-forest tabular-nums">25</div>
+                <div class="text-xs text-slate-muted font-medium">Alternative Signals</div>
+              </div>
+              <div>
+                <div class="font-display text-2xl font-bold text-primary-forest tabular-nums">100%</div>
+                <div class="text-xs text-slate-muted font-medium">SHAP Explainable</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Live Signal Simulator Preview -->
+          <div class="lg:col-span-5">
+            <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-md space-y-6">
+              <div class="flex items-center justify-between border-b border-border-subtle pb-4">
+                <div>
+                  <h3 class="font-display font-semibold text-charcoal text-base">Signal Impact Simulator</h3>
+                  <p class="text-xs text-slate-muted">Adjust alternative financial behaviors to see score effect</p>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#EAF2ED] text-prime-green">Live Model</span>
+              </div>
+
+              <!-- Interactive Sliders -->
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-xs font-medium mb-1.5">
+                    <span>Rent Payment Timeliness</span>
+                    <span id="sim-rent-val" class="font-bold text-primary-forest">95% on-time</span>
+                  </div>
+                  <input type="range" id="sim-rent" min="50" max="100" value="95" oninput="updatePublicSim()"
+                    class="w-full accent-primary-forest h-1.5 bg-canvas rounded-lg cursor-pointer">
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-medium mb-1.5">
+                    <span>Utility Bill Consistency</span>
+                    <span id="sim-util-val" class="font-bold text-primary-forest">90% regular</span>
+                  </div>
+                  <input type="range" id="sim-util" min="40" max="100" value="90" oninput="updatePublicSim()"
+                    class="w-full accent-primary-forest h-1.5 bg-canvas rounded-lg cursor-pointer">
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-xs font-medium mb-1.5">
+                    <span>Expense-to-Income Ratio</span>
+                    <span id="sim-exp-val" class="font-bold text-primary-forest">45% (Healthy)</span>
+                  </div>
+                  <input type="range" id="sim-exp" min="20" max="95" value="45" oninput="updatePublicSim()"
+                    class="w-full accent-primary-forest h-1.5 bg-canvas rounded-lg cursor-pointer">
+                </div>
+              </div>
+
+              <!-- Result Preview Card -->
+              <div class="bg-canvas rounded-lg p-4 flex items-center justify-between border border-border-subtle">
+                <div>
+                  <div class="text-xs text-slate-muted font-medium">Estimated FairScore</div>
+                  <div class="flex items-baseline gap-2">
+                    <span id="sim-score-display" class="font-display text-3xl font-bold text-primary-forest tabular-nums">782</span>
+                    <span id="sim-grade-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-[#EAF2ED] text-prime-green">Grade A</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-slate-muted font-medium">Lending Outcome</div>
+                  <span id="sim-rec-display" class="font-semibold text-prime-green text-sm">Pre-Approved</span>
+                </div>
+              </div>
+
+              <button onclick="switchPortal('applicant')" class="w-full py-2.5 text-center text-xs font-semibold rounded bg-canvas text-charcoal hover:bg-border-subtle transition-colors border border-border-subtle">
+                Start Full Verified Assessment →
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Alternative Signals Pillars Section -->
+    <section class="py-14 bg-white border-b border-border-subtle">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+          <h2 class="font-display text-2xl sm:text-3xl font-bold text-primary-spruce">The 4 Alternative Financial Pillars</h2>
+          <p class="text-sm text-slate-muted">We evaluate disciplined cash-flow behaviors that traditional credit bureaus completely ignore.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="p-5 rounded-xl border border-border-subtle bg-canvas hover:border-border-focus transition-all space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-primary-forest shadow-sm border border-border-subtle">
+              <i data-lucide="home" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-display font-semibold text-charcoal text-base">Rent Regularity</h3>
+            <p class="text-xs text-slate-muted leading-relaxed">Proof of steady housing payments through UPI, bank transfers, or verifiable receipts serves as a powerful proxy for repayment reliability.</p>
+          </div>
+
+          <div class="p-5 rounded-xl border border-border-subtle bg-canvas hover:border-border-focus transition-all space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-primary-forest shadow-sm border border-border-subtle">
+              <i data-lucide="zap" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-display font-semibold text-charcoal text-base">Utility Discipline</h3>
+            <p class="text-xs text-slate-muted leading-relaxed">Continuous, on-time electricity, water, and broadband bill payments demonstrate routine household financial discipline.</p>
+          </div>
+
+          <div class="p-5 rounded-xl border border-border-subtle bg-canvas hover:border-border-focus transition-all space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-primary-forest shadow-sm border border-border-subtle">
+              <i data-lucide="smartphone" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-display font-semibold text-charcoal text-base">Mobile Connectivity</h3>
+            <p class="text-xs text-slate-muted leading-relaxed">Account tenure and steady airtime recharge frequency indicate lifestyle stability and digital payment engagement.</p>
+          </div>
+
+          <div class="p-5 rounded-xl border border-border-subtle bg-canvas hover:border-border-focus transition-all space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-primary-forest shadow-sm border border-border-subtle">
+              <i data-lucide="wallet" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-display font-semibold text-charcoal text-base">Cash-Flow Stability</h3>
+            <p class="text-xs text-slate-muted leading-relaxed">Weekly gig platform deposits, daily merchant sales, and positive balance days confirm real debt-servicing capacity.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Governance & Privacy Strip -->
+    <section class="py-12 bg-canvas">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl border border-border-subtle p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+          <div class="space-y-2 max-w-xl">
+            <div class="flex items-center gap-2 text-primary-forest font-semibold text-sm">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+              <span>Zero-Surveillance Consent Framework</span>
+            </div>
+            <h3 class="font-display text-xl font-bold text-charcoal">You own your data. Always.</h3>
+            <p class="text-xs text-slate-muted leading-relaxed">
+              FairScore requires explicit, purpose-limited consent for every single data category. You can inspect your audit receipt and withdraw access at any time. We never sell data or score without authorization.
+            </p>
+          </div>
+          <button onclick="switchPortal('applicant')" class="px-6 py-3 rounded-lg bg-primary-forest text-white text-xs font-semibold hover:bg-primary-spruce transition-colors shadow-sm shrink-0">
+            Create Free Profile
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- PORTAL 2: APPLICANT PORTAL                                                -->
+  <!-- ========================================================================= -->
+  <main id="portal-applicant" class="portal-view hidden flex-1 flex flex-col">
+    
+    <!-- Top Context Bar -->
+    <div class="bg-white border-b border-border-subtle py-4 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="font-display text-2xl font-bold text-primary-spruce">Applicant Portal</h1>
+          <p class="text-xs text-slate-muted">Complete your profile and manage consent to receive an explainable credit assessment.</p>
+        </div>
+
+        <!-- Quick Switcher Tabs -->
+        <div class="flex items-center gap-2">
+          <button id="app-tab-onboarding" onclick="showApplicantView('onboarding')" 
+            class="px-3 py-1.5 rounded-md text-xs font-semibold bg-canvas text-primary-forest border border-border-subtle">
+            1. New Assessment Form
+          </button>
+          <button id="app-tab-results" onclick="showApplicantView('results')" 
+            class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-muted hover:text-charcoal">
+            2. My FairScore Passport
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW A: Applicant Onboarding & Consent Wizard -->
+    <div id="applicant-subview-onboarding" class="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
+      
+      <!-- Stepper Indicator -->
+      <div class="flex items-center justify-between mb-8 pb-4 border-b border-border-subtle">
+        <div class="flex items-center gap-3">
+          <span id="step-num-1" class="w-7 h-7 rounded-full bg-primary-forest text-white flex items-center justify-center text-xs font-bold">1</span>
+          <span class="text-xs font-semibold text-charcoal">Applicant Profile</span>
+        </div>
+        <div class="w-12 h-px bg-border-subtle"></div>
+        <div class="flex items-center gap-3">
+          <span id="step-num-2" class="w-7 h-7 rounded-full bg-canvas text-slate-muted border border-border-subtle flex items-center justify-center text-xs font-bold">2</span>
+          <span class="text-xs font-medium text-slate-muted">Granular Consent</span>
+        </div>
+        <div class="w-12 h-px bg-border-subtle"></div>
+        <div class="flex items-center gap-3">
+          <span id="step-num-3" class="w-7 h-7 rounded-full bg-canvas text-slate-muted border border-border-subtle flex items-center justify-center text-xs font-bold">3</span>
+          <span class="text-xs font-medium text-slate-muted">Score & Decision</span>
+        </div>
+      </div>
+
+      <!-- Quick Persona Autofill Helper -->
+      <div class="mb-6 p-4 rounded-lg bg-white border border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+        <div>
+          <div class="text-xs font-semibold text-charcoal">Auto-Fill Persona (Testing & Demonstration)</div>
+          <div class="text-[11px] text-slate-muted">Quickly populate realistic alternative profile parameters</div>
+        </div>
+        <select id="persona-select" onchange="handlePersonaSelect(this.value)" 
+          class="text-xs bg-canvas border border-border-subtle rounded-md px-3 py-1.5 focus:outline-none focus:border-border-focus font-medium">
+          <option value="">— Select an Archetype —</option>
+        </select>
+      </div>
+
+      <!-- STEP 1: Applicant Profile Form -->
+      <div id="step-content-1" class="bg-white rounded-xl border border-border-subtle p-6 sm:p-8 shadow-sm space-y-6">
+        <div class="border-b border-border-subtle pb-4">
+          <h2 class="font-display text-lg font-bold text-charcoal">Step 1: Financial & Demographic Profile</h2>
+          <p class="text-xs text-slate-muted">Provide basic background information to contextualize your alternative signals.</p>
+        </div>
+
+        <form id="applicant-form" onsubmit="handleApplicantSubmit(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <div>
+              <label class="block text-xs font-semibold text-charcoal mb-1">Occupation Type *</label>
+              <select id="field-occupation" required class="w-full text-xs bg-canvas border border-border-subtle rounded-md px-3 py-2">
+                <option value="Gig Worker">Gig Worker (Delivery, Rideshare)</option>
+                <option value="Small Shopkeeper">Small Shopkeeper / Retailer</option>
+                <option value="Student">Student / Recent Graduate</option>
+                <option value="Informal Worker">Informal Worker</option>
+                <option value="Freelancer">Freelancer / Creator</option>
+                <option value="Daily Wage Worker">Daily Wage Worker</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal mb-1">Income Cadence *</label>
+              <select id="field-income-type" required class="w-full text-xs bg-canvas border border-border-subtle rounded-md px-3 py-2">
+                <option value="Weekly">Weekly Deposits</option>
+                <option value="Daily">Daily Cash & UPI</option>
+                <option value="Monthly">Monthly Cycle</option>
+                <option value="Irregular">Irregular / Seasonal</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal mb-1">Loan Amount Requested (₹) *</label>
+              <input type="number" id="field-loan-amount" min="5000" max="500000" step="1000" value="50000" required
+                class="w-full text-xs bg-canvas border border-border-subtle rounded-md px-3 py-2 tabular-nums">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal mb-1">Loan Tenure (Months) *</label>
+              <select id="field-loan-tenure" required class="w-full text-xs bg-canvas border border-border-subtle rounded-md px-3 py-2">
+                <option value="3">3 Months</option>
+                <option value="6">6 Months</option>
+                <option value="9">9 Months</option>
+                <option value="12" selected>12 Months</option>
+                <option value="18">18 Months</option>
+                <option value="24">24 Months</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal mb-1">Geography *</label>
+              <select id="field-urban-rural" required class="w-full text-xs bg-canvas border border-border-subtle rounded-md px-3 py-2">
+                <option value="Urban">Urban</option>
+                <option value="Semi-Urban">Semi-Urban</option>
+                <option value="Rural">Rural</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal mb-1">Region *</label>
+              <select id="field-region" required class="w-full text-xs bg-canvas border border-border-subtle rounded-md px-3 py-2">
+                <option value="North">North</option>
+                <option value="South">South</option>
+                <option value="East">East</option>
+                <option value="West">West</option>
+                <option value="Central">Central</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal mb-1">Age Group *</label>
+              <select id="field-age-group" required class="w-full text-xs bg-canvas border border-border-subtle rounded-md px-3 py-2">
+                <option value="18-25">18-25</option>
+                <option value="26-35" selected>26-35</option>
+                <option value="36-45">36-45</option>
+                <option value="46-55">46-55</option>
+                <option value="56+">56+</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-charcoal mb-1">Gender *</label>
+              <select id="field-gender" required class="w-full text-xs bg-canvas border border-border-subtle rounded-md px-3 py-2">
+                <option value="Female">Female</option>
+                <option value="Male" selected>Male</option>
+                <option value="Non-Binary">Non-Binary</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="pt-4 flex justify-end">
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-primary-forest text-white text-xs font-semibold hover:bg-primary-spruce transition-all flex items-center gap-2">
+              <span>Save & Proceed to Consent</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- STEP 2: Granular Consent Selection -->
+      <div id="step-content-2" class="hidden bg-white rounded-xl border border-border-subtle p-6 sm:p-8 shadow-sm space-y-6">
+        <div class="border-b border-border-subtle pb-4 flex items-center justify-between">
+          <div>
+            <h2 class="font-display text-lg font-bold text-charcoal">Step 2: Granular Data Consent</h2>
+            <p class="text-xs text-slate-muted">Select at least 2 data sources to authorize alternative scoring. You retain 100% ownership.</p>
+          </div>
+          <span id="active-app-id-badge" class="px-2 py-0.5 rounded font-mono text-[11px] bg-canvas border border-border-subtle text-slate-muted">APP-ID</span>
+        </div>
+
+        <form id="consent-form" onsubmit="handleConsentSubmit(event)" class="space-y-4">
+          <div class="space-y-3">
+            
+            <label class="flex items-start gap-3 p-3.5 rounded-lg border border-border-subtle bg-canvas hover:border-border-focus transition-colors cursor-pointer">
+              <input type="checkbox" id="consent-rent" checked class="mt-0.5 accent-primary-forest rounded w-4 h-4">
+              <div class="space-y-0.5">
+                <div class="text-xs font-semibold text-charcoal">Rent Payment Cadence</div>
+                <p class="text-[11px] text-slate-muted">UPI/bank transfer records to landlord demonstrate monthly financial predictability.</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-lg border border-border-subtle bg-canvas hover:border-border-focus transition-colors cursor-pointer">
+              <input type="checkbox" id="consent-utility" checked class="mt-0.5 accent-primary-forest rounded w-4 h-4">
+              <div class="space-y-0.5">
+                <div class="text-xs font-semibold text-charcoal">Utility & Electricity Bills</div>
+                <p class="text-[11px] text-slate-muted">Disconnection-free bill payments indicate ongoing discipline in essential obligations.</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-lg border border-border-subtle bg-canvas hover:border-border-focus transition-colors cursor-pointer">
+              <input type="checkbox" id="consent-mobile" checked class="mt-0.5 accent-primary-forest rounded w-4 h-4">
+              <div class="space-y-0.5">
+                <div class="text-xs font-semibold text-charcoal">Mobile Recharge Continuity</div>
+                <p class="text-[11px] text-slate-muted">Consistent prepay/postpay recharges establish telecommunication stability.</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-lg border border-border-subtle bg-canvas hover:border-border-focus transition-colors cursor-pointer">
+              <input type="checkbox" id="consent-cashflow" checked class="mt-0.5 accent-primary-forest rounded w-4 h-4">
+              <div class="space-y-0.5">
+                <div class="text-xs font-semibold text-charcoal">Bank & Wallet Cash-Flow Summary</div>
+                <p class="text-[11px] text-slate-muted">Aggregated net inflow, positive balance days, and expense burden evaluation.</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-lg border border-border-subtle bg-canvas hover:border-border-focus transition-colors cursor-pointer">
+              <input type="checkbox" id="consent-business" class="mt-0.5 accent-primary-forest rounded w-4 h-4">
+              <div class="space-y-0.5">
+                <div class="text-xs font-semibold text-charcoal">Small Business Sales Ledger (Shopkeepers Only)</div>
+                <p class="text-[11px] text-slate-muted">Daily QR transaction volume and customer repeat ratios.</p>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-lg border border-border-subtle bg-canvas hover:border-border-focus transition-colors cursor-pointer">
+              <input type="checkbox" id="consent-income" checked class="mt-0.5 accent-primary-forest rounded w-4 h-4">
+              <div class="space-y-0.5">
+                <div class="text-xs font-semibold text-charcoal">Self-Declared Income Attestation</div>
+                <p class="text-[11px] text-slate-muted">Declared earnings verification for repayment capacity context.</p>
+              </div>
+            </label>
+
+          </div>
+
+          <div class="pt-4 flex items-center justify-between border-t border-border-subtle">
+            <button type="button" onclick="showApplicantStep(1)" class="px-4 py-2 rounded text-xs font-medium text-slate-muted hover:text-charcoal">
+              ← Back to Profile
+            </button>
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-primary-forest text-white text-xs font-semibold hover:bg-primary-spruce transition-all flex items-center gap-2">
+              <span>Commit Consent & Generate Score</span>
+              <i data-lucide="zap" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- SUB-VIEW B: Borrower Credit Passport & Results View -->
+    <div id="applicant-subview-results" class="hidden flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full space-y-8">
+      
+      <!-- Top Passport Header -->
+      <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <h2 id="passport-applicant-name" class="font-display text-xl font-bold text-charcoal">Verified Credit Passport</h2>
+            <span id="passport-active-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#EAF2ED] text-prime-green">Active • Verified</span>
+          </div>
+          <p id="passport-meta-sub" class="text-xs text-slate-muted font-mono">Dossier ID: APP-CUSTOM-XXXXX • Zero Traditional Bureau Dependency</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="handleConsentRevoke()" class="px-3.5 py-2 rounded-lg bg-canvas text-charcoal border border-border-subtle text-xs font-medium hover:bg-border-subtle transition-colors flex items-center gap-1.5">
+            <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-adversity-red"></i>
+            <span>Withdraw Consent</span>
+          </button>
+          <button onclick="window.print()" class="px-3.5 py-2 rounded-lg bg-primary-forest text-white text-xs font-semibold hover:bg-primary-spruce transition-colors flex items-center gap-1.5">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Print Passport</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Score & Recommendation Hero Card -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+        
+        <!-- Score Circular Gauge -->
+        <div class="md:col-span-5 bg-white rounded-xl border border-border-subtle p-6 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
+          <div class="text-xs font-semibold uppercase tracking-wider text-slate-muted">FairScore Alternative Index</div>
+          
+          <div class="relative w-44 h-44 flex items-center justify-center">
+            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" stroke="#F2F0E6" stroke-width="8" fill="transparent"></circle>
+              <circle id="passport-gauge-circle" cx="50" cy="50" r="40" stroke="#245B45" stroke-width="8" stroke-linecap="round" fill="transparent"
+                stroke-dasharray="251.2 251.2" stroke-dashoffset="251.2"></circle>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="passport-score-val" class="font-display text-4xl font-bold text-primary-forest tabular-nums">780</span>
+              <span class="text-[10px] text-slate-muted">Scale: 300 – 900</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span id="passport-grade-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#EAF2ED] text-prime-green">Tier A (Prime)</span>
+            <span id="passport-confidence-badge" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-canvas text-charcoal border border-border-subtle">High Confidence</span>
+          </div>
+        </div>
+
+        <!-- Recommendation & Underwriter Verdict -->
+        <div class="md:col-span-7 bg-white rounded-xl border border-border-subtle p-6 shadow-sm flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-slate-muted uppercase tracking-wider">Lending Recommendation</span>
+              <span id="passport-rec-badge" class="px-3 py-1 rounded text-xs font-bold uppercase bg-[#EAF2ED] text-prime-green">Approved</span>
+            </div>
+            
+            <h3 id="passport-rec-reason" class="font-display text-base font-bold text-charcoal leading-snug">
+              Strong cash-flow buffers and consistent rent discipline qualify this applicant for prime underwriting terms.
+            </h3>
+            
+            <p id="passport-summary-text" class="text-xs text-slate-muted leading-relaxed mt-2">
+              FairScore: 780. Strongest factor: rental_cadence. Default Probability: 1.2%.
+            </p>
+          </div>
+
+          <!-- Suggested Limit & Key Stat Callout -->
+          <div class="grid grid-cols-2 gap-4 pt-4 border-t border-border-subtle">
+            <div class="bg-canvas p-3 rounded-lg border border-border-subtle">
+              <div class="text-[11px] text-slate-muted font-medium">Approved Limit</div>
+              <div id="passport-limit-val" class="font-display text-lg font-bold text-primary-forest tabular-nums">₹50,000</div>
+            </div>
+            <div class="bg-canvas p-3 rounded-lg border border-border-subtle">
+              <div class="text-[11px] text-slate-muted font-medium">90-Day Delinquency Risk</div>
+              <div id="passport-default-prob-val" class="font-display text-lg font-bold text-charcoal tabular-nums">1.2%</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Contributing Factor Breakdown (SHAP Highlights) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Positive Drivers -->
+        <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-4">
+          <div class="flex items-center gap-2 border-b border-border-subtle pb-3">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-prime-green"></i>
+            <h4 class="font-display font-bold text-sm text-charcoal">Top Factors Supporting Your Score</h4>
+          </div>
+          <div id="passport-positive-factors" class="space-y-2.5">
+            <!-- Dynamic factor cards injected here -->
+          </div>
+        </div>
+
+        <!-- Areas for Improvement / Cautions -->
+        <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-4">
+          <div class="flex items-center gap-2 border-b border-border-subtle pb-3">
+            <i data-lucide="info" class="w-4 h-4 text-caution-amber"></i>
+            <h4 class="font-display font-bold text-sm text-charcoal">Actionable Tips for Higher Limits</h4>
+          </div>
+          <div id="passport-improvement-suggestions" class="space-y-2.5">
+            <!-- Dynamic improvement tips injected here -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Advanced Technical Disclosure (Expandable) -->
+      <div class="bg-white rounded-xl border border-border-subtle overflow-hidden shadow-sm">
+        <button onclick="toggleElement('passport-technical-details')" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-canvas transition-colors">
+          <div class="flex items-center gap-2 text-xs font-semibold text-charcoal">
+            <i data-lucide="code-2" class="w-4 h-4 text-slate-muted"></i>
+            <span>Detailed Model SHAP Attribution & Audit Metadata</span>
+          </div>
+          <i data-lucide="chevron-down" class="w-4 h-4 text-slate-muted"></i>
+        </button>
+        <div id="passport-technical-details" class="hidden p-6 border-t border-border-subtle bg-canvas space-y-3 font-mono text-xs text-slate-muted">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div><strong>Algorithm:</strong> GBDT v3.4</div>
+            <div><strong>Data Coverage:</strong> <span id="meta-coverage">83%</span></div>
+            <div><strong>Standardization:</strong> StandardScaler</div>
+            <div><strong>Explainability:</strong> Kernel SHAP</div>
+          </div>
+          <div class="p-3 bg-white rounded border border-border-subtle overflow-x-auto text-[11px]" id="meta-raw-factors">
+            <!-- Detailed feature contributions -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- PORTAL 3: LENDER / INSTITUTIONAL UNDERWRITING DESK                        -->
+  <!-- ========================================================================= -->
+  <main id="portal-lender" class="portal-view hidden flex-1 flex flex-col">
+    
+    <!-- Lender Desk Navigation Sub-Header -->
+    <div class="bg-white border-b border-border-subtle px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 py-3">
+        <div>
+          <h1 class="font-display text-xl font-bold text-primary-spruce">Underwriting Command & Pipeline</h1>
+          <p class="text-xs text-slate-muted">Real-time triage of credit-invisible dossiers and demographic risk parity monitoring.</p>
+        </div>
+
+        <nav class="flex items-center gap-1 bg-canvas p-1 rounded-lg border border-border-subtle overflow-x-auto">
+          <button id="lender-nav-queue" onclick="showLenderTab('queue')" 
+            class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white text-charcoal shadow-sm">
+            Applicant Queue
+          </button>
+          <button id="lender-nav-dossier" onclick="showLenderTab('dossier')" 
+            class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-muted hover:text-charcoal">
+            Applicant Dossier
+          </button>
+          <button id="lender-nav-fairness" onclick="showLenderTab('fairness')" 
+            class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-muted hover:text-charcoal">
+            Fairness & Bias
+          </button>
+          <button id="lender-nav-model" onclick="showLenderTab('model')" 
+            class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-muted hover:text-charcoal">
+            Model Performance
+          </button>
+          <button id="lender-nav-governance" onclick="showLenderTab('governance')" 
+            class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-muted hover:text-charcoal">
+            Thresholds & Audit
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- TAB 1: UNDERWRITING QUEUE & PORTFOLIO OVERVIEW -->
+    <div id="lender-tab-queue" class="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-6">
+      
+      <!-- Top 4 Clean Portfolio KPIs -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div class="bg-white rounded-xl border border-border-subtle p-5 shadow-sm space-y-1">
+          <div class="text-xs text-slate-muted font-medium">Total Portfolio Applicants</div>
+          <div id="kpi-total-applicants" class="font-display text-2xl sm:text-3xl font-bold text-charcoal tabular-nums">--</div>
+          <div class="text-[11px] text-prime-green font-medium">Deterministic Dataset</div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-border-subtle p-5 shadow-sm space-y-1">
+          <div class="text-xs text-slate-muted font-medium">Overall Approval Rate</div>
+          <div id="kpi-approval-rate" class="font-display text-2xl sm:text-3xl font-bold text-primary-forest tabular-nums">--%</div>
+          <div class="text-[11px] text-slate-muted">Rule-assisted cutoffs</div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-border-subtle p-5 shadow-sm space-y-1">
+          <div class="text-xs text-slate-muted font-medium">Portfolio Average Score</div>
+          <div id="kpi-avg-score" class="font-display text-2xl sm:text-3xl font-bold text-charcoal tabular-nums">--</div>
+          <div class="text-[11px] text-slate-muted">Normal distribution (300-900)</div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-border-subtle p-5 shadow-sm space-y-1">
+          <div class="text-xs text-slate-muted font-medium">Active Bias / AIR Alerts</div>
+          <div id="kpi-bias-alerts" class="font-display text-2xl sm:text-3xl font-bold text-caution-amber tabular-nums">--</div>
+          <div class="text-[11px] text-slate-muted">Demographic monitoring</div>
+        </div>
+      </div>
+
+      <!-- Applicant Queue Table Card -->
+      <div class="bg-white rounded-xl border border-border-subtle shadow-sm overflow-hidden space-y-4 p-5 sm:p-6">
+        
+        <!-- Search & Filter Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3 flex-1 max-w-md">
+            <div class="relative w-full">
+              <i data-lucide="search" class="w-4 h-4 text-slate-muted absolute left-3 top-2.5"></i>
+              <input type="text" id="queue-search" oninput="filterQueue()" placeholder="Search by Applicant ID or Occupation…"
+                class="w-full text-xs pl-9 pr-3 py-2 bg-canvas border border-border-subtle rounded-md focus:outline-none focus:border-border-focus">
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-muted font-medium">Risk Grade:</span>
+            <select id="queue-grade-filter" onchange="filterQueue()" class="text-xs bg-canvas border border-border-subtle rounded-md px-2.5 py-1.5">
+              <option value="ALL">All Grades (A – E)</option>
+              <option value="A">Grade A (Prime)</option>
+              <option value="B">Grade B (Low Risk)</option>
+              <option value="C">Grade C (Moderate)</option>
+              <option value="D">Grade D (Elevated)</option>
+              <option value="E">Grade E (Subprime)</option>
+            </select>
+            <button onclick="refreshQueue()" class="p-2 rounded bg-canvas border border-border-subtle text-slate-muted hover:text-charcoal transition-colors">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table Viewport -->
+        <div class="overflow-x-auto border border-border-subtle rounded-lg">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-canvas border-b border-border-subtle text-slate-muted uppercase font-semibold text-[11px]">
+              <tr>
+                <th class="py-3 px-4">Applicant ID</th>
+                <th class="py-3 px-4">Occupation</th>
+                <th class="py-3 px-4">FairScore</th>
+                <th class="py-3 px-4">Risk Grade</th>
+                <th class="py-3 px-4">Default Prob.</th>
+                <th class="py-3 px-4">Recommendation</th>
+                <th class="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="queue-table-body" class="divide-y divide-border-subtle">
+              <tr>
+                <td colspan="7" class="py-8 text-center text-slate-muted">Loading applicant queue…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-muted pt-2">
+          <span id="queue-count-display">Showing 0 applicants</span>
+          <span class="text-[11px]">Click "Inspect Dossier" to review SHAP explanations and decision controls.</span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TAB 2: APPLICANT DOSSIER & SHAP ATTRIBUTION -->
+    <div id="lender-tab-dossier" class="hidden py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-6">
+      
+      <!-- Dossier Header -->
+      <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-3">
+            <h2 id="dossier-name" class="font-display text-2xl font-bold text-primary-spruce">Select an Applicant</h2>
+            <span id="dossier-id-tag" class="px-2 py-0.5 rounded font-mono text-xs bg-canvas text-slate-muted border border-border-subtle">No ID</span>
+          </div>
+          <p id="dossier-submeta" class="text-xs text-slate-muted mt-1">Review alternative signals, SHAP attribution drivers, and execute lending verdicts.</p>
+        </div>
+
+        <!-- Direct Lookup input -->
+        <div class="flex items-center gap-2">
+          <input type="text" id="dossier-lookup-input" placeholder="Enter APP-XXXX" class="text-xs bg-canvas border border-border-subtle rounded px-3 py-1.5 font-mono">
+          <button onclick="lookupDossier(document.getElementById('dossier-lookup-input').value)" class="px-3 py-1.5 rounded bg-primary-forest text-white text-xs font-semibold hover:bg-primary-spruce transition-colors">
+            Load Dossier
+          </button>
+        </div>
+      </div>
+
+      <!-- Dossier Core Split -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Borrower Details & Financial Signals -->
+        <div class="lg:col-span-5 space-y-6">
+          
+          <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-4">
+            <h3 class="font-display font-bold text-sm text-charcoal border-b border-border-subtle pb-3">Borrower Profile & Request</h3>
+            
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <span class="text-slate-muted block text-[11px]">Occupation</span>
+                <span id="dossier-occ" class="font-semibold text-charcoal">--</span>
+              </div>
+              <div>
+                <span class="text-slate-muted block text-[11px]">Income Cadence</span>
+                <span id="dossier-income-type" class="font-semibold text-charcoal">--</span>
+              </div>
+              <div>
+                <span class="text-slate-muted block text-[11px]">Geography</span>
+                <span id="dossier-geo" class="font-semibold text-charcoal">--</span>
+              </div>
+              <div>
+                <span class="text-slate-muted block text-[11px]">Region</span>
+                <span id="dossier-region" class="font-semibold text-charcoal">--</span>
+              </div>
+              <div>
+                <span class="text-slate-muted block text-[11px]">Requested Loan</span>
+                <span id="dossier-loan" class="font-semibold text-primary-forest tabular-nums">--</span>
+              </div>
+              <div>
+                <span class="text-slate-muted block text-[11px]">Tenure</span>
+                <span id="dossier-tenure" class="font-semibold text-charcoal">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Underwriter Decision Execution Panel -->
+          <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-4">
+            <h3 class="font-display font-bold text-sm text-charcoal border-b border-border-subtle pb-3">Underwriter Decision Desk</h3>
+            
+            <div class="space-y-2">
+              <label class="block text-xs font-medium text-slate-muted">Recommendation Verdict</label>
+              <div id="dossier-rec-display" class="p-3 rounded-lg bg-canvas border border-border-subtle text-sm font-bold text-primary-forest">
+                --
+              </div>
+            </div>
+
+            <div class="pt-2 flex flex-col gap-2">
+              <button onclick="executeDecision('Approve')" class="w-full py-2.5 rounded-lg bg-primary-forest text-white text-xs font-semibold hover:bg-primary-spruce transition-colors">
+                Confirm & Sanction Loan
+              </button>
+              <button onclick="executeDecision('Manual Review')" class="w-full py-2 rounded-lg bg-canvas text-charcoal border border-border-subtle text-xs font-medium hover:bg-border-subtle transition-colors">
+                Escalate to Credit Committee
+              </button>
+              <button onclick="executeDecision('Decline')" class="w-full py-2 rounded-lg bg-white text-adversity-red border border-adversity-red/30 text-xs font-medium hover:bg-red-50 transition-colors">
+                Issue Rejection Notice
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: SHAP Explainability & Factor Waterfall -->
+        <div class="lg:col-span-7 bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-6">
+          <div class="border-b border-border-subtle pb-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-display font-bold text-base text-charcoal">Deterministic SHAP Attribution</h3>
+              <p class="text-xs text-slate-muted">Empirical feature contribution to default risk probability</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="dossier-score-chip" class="px-3 py-1 rounded font-display font-bold text-sm bg-canvas border border-border-subtle text-primary-forest">Score: --</span>
+            </div>
+          </div>
+
+          <!-- Explainer Summary Paragraph -->
+          <div class="p-3.5 rounded-lg bg-canvas border border-border-subtle text-xs text-charcoal leading-relaxed" id="dossier-shap-summary">
+            Select an applicant to review their mathematical SHAP attribution waterfall.
+          </div>
+
+          <!-- Positive Drivers (Push risk down) -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs font-semibold text-prime-green border-b border-border-subtle pb-1">
+              <span>Risk-Mitigating Factors (Lower Risk)</span>
+              <span>Impact</span>
+            </div>
+            <div id="dossier-positive-list" class="space-y-2 text-xs">
+              <div class="text-slate-muted">No factors loaded</div>
+            </div>
+          </div>
+
+          <!-- Negative Drivers (Push risk up) -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between text-xs font-semibold text-adversity-red border-b border-border-subtle pb-1">
+              <span>Risk-Elevating Factors (Higher Risk)</span>
+              <span>Impact</span>
+            </div>
+            <div id="dossier-negative-list" class="space-y-2 text-xs">
+              <div class="text-slate-muted">No factors loaded</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TAB 3: FAIRNESS & BIAS MONITORING -->
+    <div id="lender-tab-fairness" class="hidden py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-6">
+      
+      <!-- Top Overview Card -->
+      <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-subtle pb-4">
+          <div>
+            <h2 class="font-display text-xl font-bold text-primary-spruce">Algorithmic Fairness & Demographic Parity Audit</h2>
+            <p class="text-xs text-slate-muted">Continuous monitoring against Disparate Impact (Four-Fifths Rule) and False Rejection gaps.</p>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-muted font-medium">Demographic Slice:</span>
+            <select id="fairness-slice-select" onchange="loadFairnessData(this.value)" class="text-xs bg-canvas border border-border-subtle rounded px-3 py-1.5 font-medium">
+              <option value="urban_rural">Urban vs. Rural</option>
+              <option value="gender_category">Gender Category</option>
+              <option value="occupation_type">Occupation Type</option>
+              <option value="income_type">Income Cadence</option>
+              <option value="age_group">Age Group</option>
+              <option value="region_category">Geographic Region</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4 Compliance KPI Badges -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="p-4 rounded-lg bg-canvas border border-border-subtle space-y-1">
+            <div class="text-xs text-slate-muted">Disparate Impact Ratio</div>
+            <div id="fairness-di-ratio" class="font-display text-2xl font-bold text-prime-green tabular-nums">0.96</div>
+            <div class="text-[11px] text-prime-green">Above 0.80 Legal Floor</div>
+          </div>
+
+          <div class="p-4 rounded-lg bg-canvas border border-border-subtle space-y-1">
+            <div class="text-xs text-slate-muted">Audited Demographics</div>
+            <div id="fairness-total-slices" class="font-display text-2xl font-bold text-charcoal tabular-nums">6</div>
+            <div class="text-[11px] text-slate-muted">Comprehensive Slices</div>
+          </div>
+
+          <div class="p-4 rounded-lg bg-canvas border border-border-subtle space-y-1">
+            <div class="text-xs text-slate-muted">Active Bias Alerts</div>
+            <div id="fairness-alert-count" class="font-display text-2xl font-bold text-caution-amber tabular-nums">--</div>
+            <div class="text-[11px] text-slate-muted">Requires Mitigation</div>
+          </div>
+
+          <div class="p-4 rounded-lg bg-canvas border border-border-subtle space-y-1">
+            <div class="text-xs text-slate-muted">Compliance Status</div>
+            <div id="fairness-overall-status" class="font-display text-2xl font-bold text-primary-forest">PASS</div>
+            <div class="text-[11px] text-slate-muted">RBI Algorithmic Fair Standard</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts: Group Approval Rate & Score Comparison -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-3">
+          <h3 class="font-display font-semibold text-sm text-charcoal">Approval Rate Disparity by Group</h3>
+          <div class="h-64">
+            <canvas id="chart-fairness-approval"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-3">
+          <h3 class="font-display font-semibold text-sm text-charcoal">Average Score Distribution by Group</h3>
+          <div class="h-64">
+            <canvas id="chart-fairness-score"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Bias Alerts Feed -->
+      <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-border-subtle pb-3">
+          <h3 class="font-display font-bold text-sm text-charcoal">Actionable Bias & Disparity Alerts</h3>
+          <span class="text-xs text-slate-muted">Triggered when approval gaps exceed 10% or AIR falls below 0.80</span>
+        </div>
+        <div id="fairness-alerts-container" class="space-y-3">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB 4: MODEL PERFORMANCE & METRICS -->
+    <div id="lender-tab-model" class="hidden py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-6">
+      
+      <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-6">
+        <div class="border-b border-border-subtle pb-4">
+          <h2 class="font-display text-xl font-bold text-primary-spruce">Gradient Boosting Model Performance</h2>
+          <p class="text-xs text-slate-muted">Validated on 20% holdout test partition of 2,000 synthetic alternative profiles.</p>
+        </div>
+
+        <!-- 4 Key Model Metrics -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="p-4 rounded-lg bg-canvas border border-border-subtle space-y-1">
+            <div class="text-xs text-slate-muted">AUC-ROC (Discrimination)</div>
+            <div id="model-auc-roc" class="font-display text-3xl font-bold text-primary-forest tabular-nums">0.990</div>
+            <div class="text-[11px] text-slate-muted">High class separability</div>
+          </div>
+
+          <div class="p-4 rounded-lg bg-canvas border border-border-subtle space-y-1">
+            <div class="text-xs text-slate-muted">Precision</div>
+            <div id="model-precision" class="font-display text-3xl font-bold text-charcoal tabular-nums">0.923</div>
+            <div class="text-[11px] text-slate-muted">True positives / predicted</div>
+          </div>
+
+          <div class="p-4 rounded-lg bg-canvas border border-border-subtle space-y-1">
+            <div class="text-xs text-slate-muted">Recall (Sensitivity)</div>
+            <div id="model-recall" class="font-display text-3xl font-bold text-charcoal tabular-nums">0.913</div>
+            <div class="text-[11px] text-slate-muted">Default identification rate</div>
+          </div>
+
+          <div class="p-4 rounded-lg bg-canvas border border-border-subtle space-y-1">
+            <div class="text-xs text-slate-muted">F1 Score</div>
+            <div id="model-f1" class="font-display text-3xl font-bold text-primary-forest tabular-nums">0.918</div>
+            <div class="text-[11px] text-slate-muted">Harmonic mean precision/recall</div>
+          </div>
+        </div>
+
+        <!-- Confusion Matrix & Cutoff -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div class="space-y-3">
+            <h3 class="font-display font-semibold text-sm text-charcoal">Stratified Confusion Matrix (20% Holdout)</h3>
+            <div class="p-4 rounded-lg bg-canvas border border-border-subtle grid grid-cols-2 gap-3 text-center">
+              <div class="p-3 bg-white rounded border border-border-subtle">
+                <div class="text-xs text-slate-muted">True Negative (Non-default)</div>
+                <div id="cm-tn" class="font-display text-2xl font-bold text-prime-green tabular-nums">--</div>
+              </div>
+              <div class="p-3 bg-white rounded border border-border-subtle">
+                <div class="text-xs text-slate-muted">False Positive (False Alarm)</div>
+                <div id="cm-fp" class="font-display text-2xl font-bold text-caution-amber tabular-nums">--</div>
+              </div>
+              <div class="p-3 bg-white rounded border border-border-subtle">
+                <div class="text-xs text-slate-muted">False Negative (Missed Default)</div>
+                <div id="cm-fn" class="font-display text-2xl font-bold text-adversity-red tabular-nums">--</div>
+              </div>
+              <div class="p-3 bg-white rounded border border-border-subtle">
+                <div class="text-xs text-slate-muted">True Positive (Caught Default)</div>
+                <div id="cm-tp" class="font-display text-2xl font-bold text-charcoal tabular-nums">--</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <h3 class="font-display font-semibold text-sm text-charcoal">Score Distribution Histogram</h3>
+            <div class="h-48">
+              <canvas id="chart-model-score-dist"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TAB 5: GOVERNANCE, THRESHOLDS & AUDIT TRAIL -->
+    <div id="lender-tab-governance" class="hidden py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-6">
+      
+      <!-- Threshold Adjustment Desk -->
+      <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-6">
+        <div class="border-b border-border-subtle pb-4 flex items-center justify-between">
+          <div>
+            <h2 class="font-display text-xl font-bold text-primary-spruce">Lending Decision Threshold Governance</h2>
+            <p class="text-xs text-slate-muted">Adjust cutoff probabilities and minimum data requirements in real-time (`PUT /api/thresholds`).</p>
+          </div>
+          <span class="px-2.5 py-1 rounded text-xs font-semibold bg-[#EAF2ED] text-prime-green">Live Policy Active</span>
+        </div>
+
+        <form id="thresholds-form" onsubmit="handleThresholdUpdate(event)" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="space-y-2 p-4 rounded-lg bg-canvas border border-border-subtle">
+              <div class="flex justify-between text-xs font-semibold">
+                <span>Auto-Approve Max Default Prob.</span>
+                <span id="thresh-appr-val" class="text-primary-forest font-bold">15%</span>
+              </div>
+              <input type="range" id="thresh-appr" min="0.05" max="0.30" step="0.01" value="0.15" oninput="updateThreshDisplay()"
+                class="w-full accent-primary-forest h-1.5 bg-white rounded cursor-pointer">
+              <p class="text-[11px] text-slate-muted">Applicants with P(Default) below this rate receive automatic approval.</p>
+            </div>
+
+            <div class="space-y-2 p-4 rounded-lg bg-canvas border border-border-subtle">
+              <div class="flex justify-between text-xs font-semibold">
+                <span>Review Max Default Prob.</span>
+                <span id="thresh-rev-val" class="text-primary-forest font-bold">35%</span>
+              </div>
+              <input type="range" id="thresh-rev" min="0.20" max="0.60" step="0.01" value="0.35" oninput="updateThreshDisplay()"
+                class="w-full accent-primary-forest h-1.5 bg-white rounded cursor-pointer">
+              <p class="text-[11px] text-slate-muted">Applicants above this cutoff are declined. In-between cases go to manual review.</p>
+            </div>
+
+            <div class="space-y-2 p-4 rounded-lg bg-canvas border border-border-subtle">
+              <div class="flex justify-between text-xs font-semibold">
+                <span>Minimum Alternative Data Coverage</span>
+                <span id="thresh-cov-val" class="text-primary-forest font-bold">40%</span>
+              </div>
+              <input type="range" id="thresh-cov" min="0.20" max="0.80" step="0.05" value="0.40" oninput="updateThreshDisplay()"
+                class="w-full accent-primary-forest h-1.5 bg-white rounded cursor-pointer">
+              <p class="text-[11px] text-slate-muted">Minimum fraction of consented categories required to issue a score.</p>
+            </div>
+
+          </div>
+
+          <div class="flex justify-end">
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-primary-forest text-white text-xs font-semibold hover:bg-primary-spruce transition-colors">
+              Commit Threshold Revision
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Live Audit Trail Log -->
+      <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-border-subtle pb-3">
+          <div>
+            <h3 class="font-display font-bold text-sm text-charcoal">Immutable Audit Log (`data/audit_log.jsonl`)</h3>
+            <p class="text-xs text-slate-muted">Real-time persistent audit record of all scoring and underwriting events.</p>
+          </div>
+          <button onclick="refreshAuditTrail()" class="px-3 py-1 rounded bg-canvas border border-border-subtle text-xs text-charcoal hover:bg-border-subtle transition-colors flex items-center gap-1">
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-canvas text-slate-muted uppercase text-[11px]">
+              <tr>
+                <th class="py-2.5 px-3">Timestamp</th>
+                <th class="py-2.5 px-3">Applicant ID</th>
+                <th class="py-2.5 px-3">Score</th>
+                <th class="py-2.5 px-3">Risk Grade</th>
+                <th class="py-2.5 px-3">Recommendation</th>
+                <th class="py-2.5 px-3">Coverage</th>
+                <th class="py-2.5 px-3">Model</th>
+              </tr>
+            </thead>
+            <tbody id="audit-log-body" class="divide-y divide-border-subtle font-mono text-[11px]">
+              <tr>
+                <td colspan="7" class="py-4 text-center text-slate-muted">Loading audit log events…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- GLOBAL FOOTER                                                             -->
+  <!-- ========================================================================= -->
+  <footer class="bg-white border-t border-border-subtle py-8 text-xs text-slate-muted mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-5 h-5 rounded bg-primary-forest flex items-center justify-center text-white">
+          <i data-lucide="scale" class="w-3 h-3"></i>
+        </div>
+        <span class="font-display font-bold text-primary-spruce">FairScore</span>
+        <span>• Alternative Underwriting Intelligence for the Credit-Invisible</span>
+      </div>
+      <div>
+        <span>DPDP Act 2023 & RBI Synthetic Sandbox Compliant • Deterministic Model v3.4</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts: Motion Utilities & Main App Logic -->
+  <script src="motion.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+
+  <script>
+    // Initialize Lucide icons on load
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

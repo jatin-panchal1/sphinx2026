@@ -16,6 +16,8 @@ import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 # ---------------------------------------------------------------------------
 # Path setup so sibling packages are importable when running from project root
@@ -1098,3 +1100,15 @@ async def health_check() -> dict:
         "dataset_size": len(predictions_cache),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+
+# ---------------------------------------------------------------------------
+# Mount Static Frontend
+# ---------------------------------------------------------------------------
+_WEB_DIR = os.path.join(_PROJECT_ROOT, "app", "web")
+if os.path.isdir(_WEB_DIR):
+    app.mount("/static", StaticFiles(directory=_WEB_DIR), name="static")
+
+    @app.get("/", include_in_schema=False)
+    async def serve_index():
+        return FileResponse(os.path.join(_WEB_DIR, "index.html"))

@@ -34,34 +34,34 @@ st.markdown(
     <style>
     /* Colour tokens */
     :root {
-        --primary: #2E86AB;
-        --success: #28A745;
+        --primary: #245B45;
+        --success: #245B45;
         --warning: #FFC107;
         --danger:  #DC3545;
     }
-    .score-green  { color: #28A745; font-size: 3.5rem; font-weight: 800; }
+    .score-green  { color: #245B45; font-size: 3.5rem; font-weight: 800; }
     .score-yellow { color: #FFC107; font-size: 3.5rem; font-weight: 800; }
     .score-red    { color: #DC3545; font-size: 3.5rem; font-weight: 800; }
 
     .badge { display: inline-block; padding: 0.35em 0.75em; border-radius: 0.5em;
              font-weight: 700; font-size: 1rem; color: #fff; }
-    .badge-green  { background: #28A745; }
+    .badge-green  { background: #245B45; }
     .badge-yellow { background: #FFC107; color: #333; }
     .badge-orange { background: #FD7E14; }
     .badge-red    { background: #DC3545; }
 
     .factor-card { border: 1px solid #e0e0e0; border-radius: 8px;
                    padding: 12px 16px; margin-bottom: 8px; }
-    .factor-positive { border-left: 4px solid #28A745; }
+    .factor-positive { border-left: 4px solid #245B45; }
     .factor-negative { border-left: 4px solid #DC3545; }
 
     .metric-card { background: #f8f9fa; border-radius: 10px;
                    padding: 1.25rem; text-align: center; }
-    .metric-value { font-size: 2rem; font-weight: 800; color: #2E86AB; }
+    .metric-value { font-size: 2rem; font-weight: 800; color: #245B45; }
     .metric-label { font-size: 0.85rem; color: #6c757d; }
 
     .how-step { text-align: center; padding: 1rem; }
-    .how-step h3 { color: #2E86AB; }
+    .how-step h3 { color: #245B45; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -322,13 +322,13 @@ def page_applicant_entry() -> None:
     if submitted:
         payload = {
             "age_group": age_group,
-            "gender": gender,
-            "region": region,
+            "gender_category": gender,
+            "region_category": region,
             "urban_rural": urban_rural,
-            "occupation": occupation,
+            "occupation_type": occupation,
             "income_type": income_type,
-            "loan_amount": loan_amount,
-            "loan_tenure": loan_tenure,
+            "loan_amount_requested": float(loan_amount),
+            "loan_tenure_months": int(loan_tenure),
         }
         with st.spinner("Creating applicant profile…"):
             result = _api_post("/api/applicant", json_body=payload)
@@ -472,7 +472,7 @@ def _recommendation_badge(rec: str) -> str:
 def _gauge_chart(score: float) -> go.Figure:
     """Create a plotly gauge chart for the credit score."""
     if score > 700:
-        bar_color = "#28A745"
+        bar_color = "#245B45"
     elif score >= 500:
         bar_color = "#FFC107"
     else:
@@ -547,11 +547,17 @@ def page_score_result() -> None:
     st.divider()
 
     # ---- Recommendation ----
-    recommendation = result.get("recommendation", {})
-    rec_decision = recommendation.get("decision", "N/A")
-    rec_reason = recommendation.get("reason", "")
-    rec_limit = recommendation.get("suggested_limit")
-    improvements = recommendation.get("improvements", [])
+    raw_rec = result.get("recommendation", "N/A")
+    if isinstance(raw_rec, dict):
+        rec_decision = raw_rec.get("decision", "N/A")
+        rec_reason = raw_rec.get("reason", "")
+        rec_limit = raw_rec.get("suggested_limit")
+        improvements = raw_rec.get("improvements", [])
+    else:
+        rec_decision = str(raw_rec)
+        rec_reason = result.get("recommendation_reason", "")
+        rec_limit = result.get("approved_limit")
+        improvements = result.get("improvements", [])
 
     badge_cls = _recommendation_badge(rec_decision)
     st.markdown(f'<span class="{badge_cls}">{rec_decision}</span>', unsafe_allow_html=True)
@@ -676,7 +682,7 @@ def page_dashboard() -> None:
                 y=rates,
                 labels={"x": "Risk Grade", "y": "Approval Rate (%)"},
                 color=rates,
-                color_continuous_scale=["#DC3545", "#FFC107", "#28A745"],
+                color_continuous_scale=["#DC3545", "#FFC107", "#245B45"],
             )
             fig.update_layout(showlegend=False, height=350, margin=dict(t=20, b=40))
             st.plotly_chart(fig, use_container_width=True)
@@ -898,7 +904,7 @@ def page_bias_audit() -> None:
                 y=approval_rates,
                 labels={"x": dim_labels.get(selected_dim, selected_dim), "y": "Approval Rate (%)"},
                 color=approval_rates,
-                color_continuous_scale=["#DC3545", "#FFC107", "#28A745"],
+                color_continuous_scale=["#DC3545", "#FFC107", "#245B45"],
             )
             fig.update_layout(showlegend=False, height=350, margin=dict(t=20, b=40))
             st.plotly_chart(fig, use_container_width=True)
@@ -910,7 +916,7 @@ def page_bias_audit() -> None:
                 y=avg_scores,
                 labels={"x": dim_labels.get(selected_dim, selected_dim), "y": "Average Score"},
                 color=avg_scores,
-                color_continuous_scale=["#DC3545", "#FFC107", "#28A745"],
+                color_continuous_scale=["#DC3545", "#FFC107", "#245B45"],
             )
             fig.update_layout(showlegend=False, height=350, margin=dict(t=20, b=40))
             st.plotly_chart(fig, use_container_width=True)
@@ -949,7 +955,7 @@ def page_bias_audit() -> None:
         st.markdown("### Disparate Impact Indicator")
         ratio = di_data.get("ratio", di_data.get("disparate_impact_ratio"))
         if ratio is not None:
-            color = "#28A745" if ratio >= 0.8 else "#DC3545"
+            color = "#245B45" if ratio >= 0.8 else "#DC3545"
             label = "PASS ✅" if ratio >= 0.8 else "FAIL ❌"
             st.markdown(
                 f'<div style="font-size:2rem; font-weight:800; color:{color};">'
