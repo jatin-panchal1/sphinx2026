@@ -11,6 +11,8 @@ let modelScoreDistChart = null;
 document.addEventListener('DOMContentLoaded', async () => {
   checkBackendHealth();
   loadPersonasDropdown();
+  loadPublicStats();
+  updatePublicSim();
   
   // Listen for hash change for bookmarkable URLs
   window.addEventListener('hashchange', handleHashChange);
@@ -19,6 +21,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load initial lender data in background
   preloadLenderData();
 });
+
+async function loadPublicStats() {
+  try {
+    const dash = await FairAPI.getDashboard().catch(() => null);
+    if (dash) {
+      const total = dash.total_applicants || 1000;
+      const apprRate = (dash.approval_rate !== undefined) ? (dash.approval_rate * 100).toFixed(1) : '78.5';
+      const elTotal = document.getElementById('public-stat-applicants');
+      const elAppr = document.getElementById('public-stat-approval');
+      if (elTotal) elTotal.textContent = `${total.toLocaleString()}+`;
+      if (elAppr) elAppr.textContent = `${apprRate}%`;
+    }
+
+    const metrics = await FairAPI.getModelMetrics().catch(() => null);
+    if (metrics && metrics.test_roc_auc) {
+      const elRoc = document.getElementById('public-stat-roc');
+      if (elRoc) elRoc.textContent = Number(metrics.test_roc_auc).toFixed(3);
+    }
+  } catch (e) {
+    console.warn('Could not load public stats:', e);
+  }
+}
 
 function handleHashChange() {
   const hash = window.location.hash.replace('#', '') || 'public';
@@ -99,46 +123,109 @@ function toggleElement(id) {
 // Public Simulator Logic
 // =========================================================================
 
-function updatePublicSim() {
-  const rent = parseInt(document.getElementById('sim-rent').value, 10);
-  const util = parseInt(document.getElementById('sim-util').value, 10);
-  const exp = parseInt(document.getElementById('sim-exp').value, 10);
+function setPublicPersona(type) {
+  const rentInput = document.getElementById('sim-rent');
+  const utilInput = document.getElementById('sim-util');
+  const expInput = document.getElementById('sim-exp');
+  if (!rentInput || !utilInput || !expInput) return;
 
-  document.getElementById('sim-rent-val').textContent = `${rent}% on-time`;
-  document.getElementById('sim-util-val').textContent = `${util}% regular`;
-  document.getElementById('sim-exp-val').textContent = `${exp}% (${exp < 55 ? 'Healthy' : exp < 75 ? 'Moderate' : 'High'})`;
+  if (type === 'gig') {
+    rentInput.value = 92;
+    utilInput.value = 88;
+    expInput.value = 45;
+  } else if (type === 'shopkeeper') {
+    rentInput.value = 98;
+    utilInput.value = 95;
+    expInput.value = 38;
+  } else if (type === 'student') {
+    rentInput.value = 85;
+    utilInput.value = 80;
+    expInput.value = 60;
+  } else if (type === 'laborer') {
+    rentInput.value = 75;
+    utilInput.value = 70;
+    expInput.value = 70;
+  }
+  updatePublicSim();
+}
 
-  // Estimate formula: 300 to 900 base
-  let score = 550 + (rent - 75) * 4.2 + (util - 70) * 3.1 - (exp - 50) * 4.5;
-  score = Math.round(Math.max(320, Math.min(885, score)));
+let publicSimDebounceTimer = null;
+
+async function updatePublicSim() {
+  const rentInput = document.getElementById('sim-rent');
+  const utilInput = document.getElementById('sim-util');
+  const expInput = document.getElementById('sim-exp');
+  if (!rentInput || !utilInput || !expInput) return;
+
+  const rent = parseInt(rentInput.value, 10);
+  const util = parseInt(utilInput.value, 10);
+  const exp = parseInt(expInput.value, 10);
+
+  const rentValEl = document.getElementById('sim-rent-val');
+  const utilValEl = document.getElementById('sim-util-val');
+  const expValEl = document.getElementById('sim-exp-val');
+
+  if (rentValEl) rentValEl.textContent = `${rent}% on-time`;
+  if (utilValEl) utilValEl.textContent = `${util}% regular`;
+  if (expValEl) expValEl.textContent = `${exp}% (${exp < 55 ? 'Healthy' : exp < 75 ? 'Moderate' : 'High'})`;
+
+  // Immediate responsive feedback with local approximation
+  let localScore = 550 + (rent - 75) * 4.2 + (util - 70) * 3.1 - (exp - 50) * 4.5;
+  localScore = Math.round(Math.max(320, Math.min(885, localScore)));
 
   const scoreEl = document.getElementById('sim-score-display');
-  scoreEl.textContent = score;
-
   const gradeEl = document.getElementById('sim-grade-badge');
   const recEl = document.getElementById('sim-rec-display');
+  const factorsEl = document.getElementById('sim-factors-list');
 
-  if (score >= 780) {
-    gradeEl.textContent = 'Grade A';
-    gradeEl.className = 'px-2 py-0.5 rounded text-xs font-bold bg-[#EAF2ED] text-prime-green';
-    recEl.textContent = 'Pre-Approved';
-    recEl.className = 'font-semibold text-prime-green text-sm';
-  } else if (score >= 700) {
-    gradeEl.textContent = 'Grade B';
-    gradeEl.className = 'px-2 py-0.5 rounded text-xs font-bold bg-[#EAF2ED] text-prime-green';
-    recEl.textContent = 'Approved';
-    recEl.className = 'font-semibold text-prime-green text-sm';
-  } else if (score >= 620) {
-    gradeEl.textContent = 'Grade C';
-    gradeEl.className = 'px-2 py-0.5 rounded text-xs font-bold bg-[#FFF5E6] text-caution-amber';
-    recEl.textContent = 'Reduced Limit';
-    recEl.className = 'font-semibold text-caution-amber text-sm';
-  } else {
-    gradeEl.textContent = 'Grade D';
-    gradeEl.className = 'px-2 py-0.5 rounded text-xs font-bold bg-[#FDE8E8] text-adversity-red';
-    recEl.textContent = 'Manual Review';
-    recEl.className = 'font-semibold text-adversity-red text-sm';
-  }
+  // Debounced live API call to /api/simulate
+  clearTimeout(publicSimDebounceTimer);
+  publicSimDebounceTimer = setTimeout(async () => {
+    try {
+      const res = await FairAPI.simulateScore({
+        rent_on_time_pct: rent,
+        utility_on_time_pct: util,
+        expense_to_income_pct: exp
+      });
+      if (res && res.score) {
+        if (scoreEl) scoreEl.textContent = res.score;
+        if (gradeEl) {
+          gradeEl.textContent = `Grade ${res.risk_grade}`;
+          if (res.risk_grade === 'A' || res.risk_grade === 'B') {
+            gradeEl.className = 'px-2 py-0.5 rounded text-xs font-bold bg-[#EAF2ED] text-prime-green';
+          } else if (res.risk_grade === 'C') {
+            gradeEl.className = 'px-2 py-0.5 rounded text-xs font-bold bg-[#FFF5E6] text-caution-amber';
+          } else {
+            gradeEl.className = 'px-2 py-0.5 rounded text-xs font-bold bg-[#FDE8E8] text-adversity-red';
+          }
+        }
+        if (recEl) {
+          recEl.textContent = res.recommendation;
+          if (res.risk_grade === 'A' || res.risk_grade === 'B') {
+            recEl.className = 'font-semibold text-prime-green text-sm';
+          } else if (res.risk_grade === 'C') {
+            recEl.className = 'font-semibold text-caution-amber text-sm';
+          } else {
+            recEl.className = 'font-semibold text-adversity-red text-sm';
+          }
+        }
+
+        if (factorsEl && Array.isArray(res.factors)) {
+          factorsEl.innerHTML = res.factors.map(f => {
+            const isPos = f.type === 'positive';
+            const icon = isPos ? 'check' : 'alert-circle';
+            const color = isPos ? 'text-prime-green' : 'text-adversity-red';
+            return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-white text-charcoal border border-border-subtle font-medium">
+              <i data-lucide="${icon}" class="w-3 h-3 ${color}"></i> ${f.feature}
+            </span>`;
+          }).join('');
+          if (window.lucide) lucide.createIcons();
+        }
+      }
+    } catch (err) {
+      console.warn('Live simulation API fallback:', err);
+    }
+  }, 100);
 }
 
 // =========================================================================

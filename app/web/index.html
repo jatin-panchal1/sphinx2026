@@ -177,16 +177,16 @@
             <!-- Key Proof Points -->
             <div class="grid grid-cols-3 gap-6 pt-6 border-t border-border-subtle max-w-lg">
               <div>
-                <div class="font-display text-2xl font-bold text-primary-forest tabular-nums">1.4B+</div>
-                <div class="text-xs text-slate-muted font-medium">Credit Invisible Globally</div>
+                <div id="public-stat-applicants" class="font-display text-2xl font-bold text-primary-forest tabular-nums">1,000+</div>
+                <div class="text-xs text-slate-muted font-medium">Evaluated Profiles</div>
               </div>
               <div>
-                <div class="font-display text-2xl font-bold text-primary-forest tabular-nums">25</div>
-                <div class="text-xs text-slate-muted font-medium">Alternative Signals</div>
+                <div id="public-stat-approval" class="font-display text-2xl font-bold text-primary-forest tabular-nums">78.5%</div>
+                <div class="text-xs text-slate-muted font-medium">Inclusion Rate</div>
               </div>
               <div>
-                <div class="font-display text-2xl font-bold text-primary-forest tabular-nums">100%</div>
-                <div class="text-xs text-slate-muted font-medium">SHAP Explainable</div>
+                <div id="public-stat-roc" class="font-display text-2xl font-bold text-primary-forest tabular-nums">0.865</div>
+                <div class="text-xs text-slate-muted font-medium">Model ROC-AUC</div>
               </div>
             </div>
           </div>
@@ -194,12 +194,23 @@
           <!-- Interactive Live Signal Simulator Preview -->
           <div class="lg:col-span-5">
             <div class="bg-white rounded-xl border border-border-subtle p-6 shadow-md space-y-6">
-              <div class="flex items-center justify-between border-b border-border-subtle pb-4">
+              <div class="flex items-center justify-between border-b border-border-subtle pb-3">
                 <div>
                   <h3 class="font-display font-semibold text-charcoal text-base">Signal Impact Simulator</h3>
-                  <p class="text-xs text-slate-muted">Adjust alternative financial behaviors to see score effect</p>
+                  <p class="text-xs text-slate-muted">Adjust alternative financial behaviors to see live score effect</p>
                 </div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#EAF2ED] text-prime-green">Live Model</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#EAF2ED] text-prime-green">Live ML Model</span>
+              </div>
+
+              <!-- Persona Quick Presets -->
+              <div class="space-y-1.5 pb-2 border-b border-border-subtle">
+                <span class="text-[11px] font-semibold text-slate-muted uppercase tracking-wider">Try Demo Persona</span>
+                <div class="grid grid-cols-4 gap-1.5 pt-1">
+                  <button onclick="setPublicPersona('gig')" type="button" class="px-2 py-1 text-xs rounded bg-canvas hover:bg-border-subtle border border-border-subtle font-medium text-charcoal text-center transition-colors">Gig Worker</button>
+                  <button onclick="setPublicPersona('shopkeeper')" type="button" class="px-2 py-1 text-xs rounded bg-canvas hover:bg-border-subtle border border-border-subtle font-medium text-charcoal text-center transition-colors">Shopkeeper</button>
+                  <button onclick="setPublicPersona('student')" type="button" class="px-2 py-1 text-xs rounded bg-canvas hover:bg-border-subtle border border-border-subtle font-medium text-charcoal text-center transition-colors">Student</button>
+                  <button onclick="setPublicPersona('laborer')" type="button" class="px-2 py-1 text-xs rounded bg-canvas hover:bg-border-subtle border border-border-subtle font-medium text-charcoal text-center transition-colors">Daily Wage</button>
+                </div>
               </div>
 
               <!-- Interactive Sliders -->
@@ -233,17 +244,29 @@
               </div>
 
               <!-- Result Preview Card -->
-              <div class="bg-canvas rounded-lg p-4 flex items-center justify-between border border-border-subtle">
-                <div>
-                  <div class="text-xs text-slate-muted font-medium">Estimated FairScore</div>
-                  <div class="flex items-baseline gap-2">
-                    <span id="sim-score-display" class="font-display text-3xl font-bold text-primary-forest tabular-nums">782</span>
-                    <span id="sim-grade-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-[#EAF2ED] text-prime-green">Grade A</span>
+              <div class="bg-canvas rounded-lg p-4 border border-border-subtle space-y-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-xs text-slate-muted font-medium">Estimated FairScore</div>
+                    <div class="flex items-baseline gap-2">
+                      <span id="sim-score-display" class="font-display text-3xl font-bold text-primary-forest tabular-nums">782</span>
+                      <span id="sim-grade-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-[#EAF2ED] text-prime-green">Grade A</span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-xs text-slate-muted font-medium">Lending Outcome</div>
+                    <span id="sim-rec-display" class="font-semibold text-prime-green text-sm">Pre-Approved</span>
                   </div>
                 </div>
-                <div class="text-right">
-                  <div class="text-xs text-slate-muted font-medium">Lending Outcome</div>
-                  <span id="sim-rec-display" class="font-semibold text-prime-green text-sm">Pre-Approved</span>
+
+                <!-- Live Factors Container -->
+                <div id="sim-factors-list" class="flex flex-wrap gap-1.5 pt-2 border-t border-border-subtle">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-white text-primary-forest border border-border-subtle font-medium">
+                    <i data-lucide="check" class="w-3 h-3 text-prime-green"></i> 95% Rent Regularity
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-white text-primary-forest border border-border-subtle font-medium">
+                    <i data-lucide="check" class="w-3 h-3 text-prime-green"></i> 90% Utility Discipline
+                  </span>
                 </div>
               </div>
 

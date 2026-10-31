@@ -168,5 +168,6 @@ const FairAPI = {
   getDashboard: () => FairAPI.get('/api/dashboard'),
   getFairness: (groupBy = null) => FairAPI.get('/api/fairness', { group_by: groupBy }),
   getModelMetrics: () => FairAPI.get('/api/model/metrics'),
+  simulateScore: (params) => FairAPI.post('/api/simulate', params),
   updateThresholds: (thresholds) => FairAPI.put('/api/thresholds', thresholds)
 };

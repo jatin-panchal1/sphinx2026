@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
+from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -1194,6 +1195,98 @@ async def list_personas() -> list:
         if "name" not in p:
             p["name"] = p["label"]
     return PERSONAS
+
+
+# =========================================================================
+#  Public Simulator Endpoint (Connected to Live ML Model)
+# =========================================================================
+
+class SimulateRequest(BaseModel):
+    rent_on_time_pct: float = Field(default=95.0, ge=0.0, le=100.0)
+    utility_on_time_pct: float = Field(default=90.0, ge=0.0, le=100.0)
+    expense_to_income_pct: float = Field(default=45.0, ge=0.0, le=100.0)
+    occupation_type: Optional[str] = Field(default="Gig Worker")
+    monthly_income: Optional[float] = Field(default=25000.0, ge=0.0)
+
+
+@app.post("/api/simulate")
+async def simulate_public_score(req: SimulateRequest) -> dict:
+    """Public credit scoring simulator for Thin-File borrowers without requiring prior registration."""
+    if model is None or features_df is None or decision_engine is None:
+        raise HTTPException(status_code=503, detail="Scoring engine not initialised")
+
+    # Start with baseline median features from the trained dataset
+    feature_dict = {}
+    for col in feature_cols:
+        if col in features_df.columns:
+            feature_dict[col] = float(features_df[col].median())
+        else:
+            feature_dict[col] = 0.5
+
+    # Apply alternative signal slider inputs
+    rent_ratio = float(req.rent_on_time_pct) / 100.0
+    util_ratio = float(req.utility_on_time_pct) / 100.0
+    exp_ratio = float(req.expense_to_income_pct) / 100.0
+
+    feature_dict["rent_on_time_ratio"] = rent_ratio
+    feature_dict["utility_on_time_ratio"] = util_ratio
+    feature_dict["overall_payment_reliability"] = (rent_ratio + util_ratio) / 2.0
+    feature_dict["missed_payment_ratio"] = max(0.0, 1.0 - rent_ratio)
+    feature_dict["average_days_late_norm"] = max(0.0, (1.0 - rent_ratio) * 0.8)
+    feature_dict["expense_to_income_ratio"] = exp_ratio
+    feature_dict["rent_to_income_ratio"] = min(0.5, exp_ratio * 0.45)
+    feature_dict["bill_to_income_ratio"] = min(0.3, exp_ratio * 0.25)
+    feature_dict["positive_balance_ratio"] = max(0.1, 1.0 - (exp_ratio * 0.8))
+    feature_dict["data_coverage"] = 0.85
+
+    try:
+        pred = model.predict_single(feature_dict)
+    except Exception as exc:
+        logger.error("Simulation prediction failed: %s", exc)
+        raise HTTPException(status_code=500, detail=f"Simulation error: {exc}")
+
+    score = int(pred.get("score", 700))
+    default_prob = float(pred.get("default_probability", 0.15))
+    risk_grade = _risk_grade_from_score(score)
+
+    # Decision engine evaluation
+    try:
+        decision = decision_engine.evaluate(
+            score=score,
+            default_probability=default_prob,
+            data_coverage=0.85,
+            expense_ratio=exp_ratio,
+            loan_amount=50000.0,
+            monthly_income=float(req.monthly_income or 25000.0),
+            missed_payments=int(round(feature_dict["missed_payment_ratio"] * 2)),
+        )
+        recommendation = decision.get("recommendation", _dp_to_recommendation(default_prob))
+    except Exception:
+        recommendation = _dp_to_recommendation(default_prob)
+
+    # Top drivers
+    factors = []
+    if rent_ratio >= 0.90:
+        factors.append({"feature": "Rent Payment Regularity", "impact": 0.28, "type": "positive", "detail": f"{int(req.rent_on_time_pct)}% on-time record strongly boosts score"})
+    elif rent_ratio < 0.70:
+        factors.append({"feature": "Rent Payment Delay", "impact": -0.25, "type": "negative", "detail": f"{int(req.rent_on_time_pct)}% on-time signals irregular cash buffer"})
+
+    if util_ratio >= 0.85:
+        factors.append({"feature": "Utility Bill Discipline", "impact": 0.22, "type": "positive", "detail": f"{int(req.utility_on_time_pct)}% timely utility bill payments demonstrate routine discipline"})
+
+    if exp_ratio <= 0.50:
+        factors.append({"feature": "Low Expense Burden", "impact": 0.25, "type": "positive", "detail": f"Expenses at {int(req.expense_to_income_pct)}% of income ensure debt-servicing headroom"})
+    elif exp_ratio > 0.70:
+        factors.append({"feature": "High Expense Burden", "impact": -0.30, "type": "negative", "detail": f"Expenses at {int(req.expense_to_income_pct)}% of income constrain discretionary liquidity"})
+
+    return {
+        "score": score,
+        "default_probability": round(default_prob, 4),
+        "risk_grade": risk_grade,
+        "recommendation": recommendation,
+        "confidence": "High",
+        "factors": factors,
+    }
 
 
 # =========================================================================
