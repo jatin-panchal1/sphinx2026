@@ -202,16 +202,6 @@
                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#EAF2ED] text-prime-green">Live ML Model</span>
               </div>
 
-              <!-- Persona Quick Presets -->
-              <div class="space-y-1.5 pb-2 border-b border-border-subtle">
-                <span class="text-[11px] font-semibold text-slate-muted uppercase tracking-wider">Try Demo Persona</span>
-                <div class="grid grid-cols-4 gap-1.5 pt-1">
-                  <button onclick="setPublicPersona('gig')" type="button" class="px-2 py-1 text-xs rounded bg-canvas hover:bg-border-subtle border border-border-subtle font-medium text-charcoal text-center transition-colors">Gig Worker</button>
-                  <button onclick="setPublicPersona('shopkeeper')" type="button" class="px-2 py-1 text-xs rounded bg-canvas hover:bg-border-subtle border border-border-subtle font-medium text-charcoal text-center transition-colors">Shopkeeper</button>
-                  <button onclick="setPublicPersona('student')" type="button" class="px-2 py-1 text-xs rounded bg-canvas hover:bg-border-subtle border border-border-subtle font-medium text-charcoal text-center transition-colors">Student</button>
-                  <button onclick="setPublicPersona('laborer')" type="button" class="px-2 py-1 text-xs rounded bg-canvas hover:bg-border-subtle border border-border-subtle font-medium text-charcoal text-center transition-colors">Daily Wage</button>
-                </div>
-              </div>
 
               <!-- Interactive Sliders -->
               <div class="space-y-4">
@@ -395,17 +385,6 @@
         </div>
       </div>
 
-      <!-- Quick Persona Autofill Helper -->
-      <div class="mb-6 p-4 rounded-lg bg-white border border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-        <div>
-          <div class="text-xs font-semibold text-charcoal">Auto-Fill Persona (Testing & Demonstration)</div>
-          <div class="text-[11px] text-slate-muted">Quickly populate realistic alternative profile parameters</div>
-        </div>
-        <select id="persona-select" onchange="handlePersonaSelect(this.value)" 
-          class="text-xs bg-canvas border border-border-subtle rounded-md px-3 py-1.5 focus:outline-none focus:border-border-focus font-medium">
-          <option value="">— Select an Archetype —</option>
-        </select>
-      </div>
 
       <!-- STEP 1: Applicant Profile Form -->
       <div id="step-content-1" class="bg-white rounded-xl border border-border-subtle p-6 sm:p-8 shadow-sm space-y-6">
@@ -441,7 +420,7 @@
 
             <div>
               <label class="block text-xs font-semibold text-charcoal mb-1">Loan Amount Requested (₹) *</label>
-              <input type="number" id="field-loan-amount" min="5000" max="500000" step="1000" value="50000" required
+              <input type="number" id="field-loan-amount" min="5000" max="500000" step="1000" placeholder="e.g. 50000" required
                 class="w-full text-xs bg-canvas border border-border-subtle rounded-md px-3 py-2 tabular-nums">
             </div>
 

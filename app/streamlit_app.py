@@ -299,22 +299,9 @@ def page_home() -> None:
 def page_applicant_entry() -> None:
     """Applicant intake form."""
     st.markdown("# 📝 Applicant Entry")
-    st.caption("Enter applicant details or pick a quick persona to auto-fill the form.")
+    st.caption("Enter applicant details to generate an explainable credit assessment.")
 
-    # ------ persona auto-fill ------
-    personas_data = _api_get("/api/personas")
-    persona_names: List[str] = ["— Select a Persona —"]
-    persona_map: Dict[str, Dict] = {}
-    if personas_data:
-        for p in personas_data:
-            label = p.get("name", p.get("persona_name", str(p)))
-            persona_names.append(label)
-            persona_map[label] = p
-
-    selected_persona = st.selectbox("Quick Persona", persona_names)
     prefill: Dict[str, Any] = {}
-    if selected_persona != "— Select a Persona —":
-        prefill = persona_map.get(selected_persona, {})
 
     st.divider()
 
