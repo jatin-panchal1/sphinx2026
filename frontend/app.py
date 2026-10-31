@@ -71,10 +71,26 @@ with st.sidebar:
     st.image("https://img.icons8.com/fluency/96/000000/scales.png", width=60)
     st.title("FairScore")
     st.caption("Alternative Credit Scoring")
+    _FRONTEND_PAGES = ["🏠 Score Applicant", "📊 Explanation", "📈 Dashboard", "⚖️ Bias Audit"]
+    if "frontend_page" not in st.session_state:
+        st.session_state["frontend_page"] = "🏠 Score Applicant"
+    if st.session_state.get("frontend_nav") != st.session_state["frontend_page"]:
+        st.session_state["frontend_nav"] = st.session_state["frontend_page"]
+
+    def _on_nav_change():
+        st.session_state["frontend_page"] = st.session_state["frontend_nav"]
+
+    def _navigate_frontend(p: str):
+        st.session_state["frontend_page"] = p
+        st.session_state["frontend_nav"] = p
+
     page = st.radio(
         "Navigation",
-        ["🏠 Score Applicant", "📊 Explanation", "📈 Dashboard", "⚖️ Bias Audit"],
+        _FRONTEND_PAGES,
+        key="frontend_nav",
+        on_change=_on_nav_change,
     )
+    st.session_state["frontend_page"] = page
     st.markdown("---")
     health = _get("/health")
     if "_error" in health:
@@ -227,6 +243,22 @@ if page == "🏠 Score Applicant":
                 for f in neg:
                     st.markdown(f"- **{f['feature']}** (impact: +{f['impact']:.3f})")
 
+            st.divider()
+            st.subheader("Explore Connected Analysis")
+            c_nx1, c_nx2, c_nx3 = st.columns(3)
+            with c_nx1:
+                if st.button("📊 View Deep SHAP Factor Breakdown →", use_container_width=True, type="primary"):
+                    _navigate_frontend("📊 Explanation")
+                    st.rerun()
+            with c_nx2:
+                if st.button("📈 Open Portfolio Dashboard →", use_container_width=True):
+                    _navigate_frontend("📈 Dashboard")
+                    st.rerun()
+            with c_nx3:
+                if st.button("⚖️ Inspect Demographic Bias Audit →", use_container_width=True):
+                    _navigate_frontend("⚖️ Bias Audit")
+                    st.rerun()
+
 
 # ===========================================================================
 # Page 2 – Explanation
@@ -236,40 +268,55 @@ elif page == "📊 Explanation":
     st.title("📊 Score Explanation")
 
     if "last_payload" not in st.session_state:
-        st.info("Generate a score first on the **Score Applicant** page.")
+        st.info("⚠️ No scored applicant found. Generate a score first on the **Score Applicant** page.")
+        if st.button("← Go to Score Applicant", type="primary"):
+            _navigate_frontend("🏠 Score Applicant")
+            st.rerun()
     else:
-        if st.button("🔍 Explain Last Score"):
-            with st.spinner("Generating explanation…"):
-                result = _post("/explain", st.session_state["last_payload"])
+        if "cached_explanation" not in st.session_state or st.button("🔄 Refresh Explanation"):
+            with st.spinner("Computing SHAP explanations…"):
+                st.session_state["cached_explanation"] = _post("/explain", st.session_state["last_payload"])
 
-            if "_error" in result:
-                st.error(f"Explanation failed: {result['_error']}")
+        result = st.session_state.get("cached_explanation", {})
+        if "_error" in result:
+            st.error(f"Explanation failed: {result['_error']}")
+        else:
+            st.subheader("Positive Factors (lower risk)")
+            pos = result.get("positive_factors", [])
+            if pos:
+                df_pos = pd.DataFrame(pos)
+                st.dataframe(df_pos, use_container_width=True)
             else:
-                st.subheader("Positive Factors (lower risk)")
-                pos = result.get("positive_factors", [])
-                if pos:
-                    df_pos = pd.DataFrame(pos)
-                    st.dataframe(df_pos, use_container_width=True)
-                else:
-                    st.info("No positive factors computed.")
+                st.info("No positive factors computed.")
 
-                st.subheader("Risk Factors (higher risk)")
-                neg = result.get("negative_factors", [])
-                if neg:
-                    df_neg = pd.DataFrame(neg)
-                    st.dataframe(df_neg, use_container_width=True)
-                else:
-                    st.info("No risk factors computed.")
+            st.subheader("Risk Factors (higher risk)")
+            neg = result.get("negative_factors", [])
+            if neg:
+                df_neg = pd.DataFrame(neg)
+                st.dataframe(df_neg, use_container_width=True)
+            else:
+                st.info("No risk factors computed.")
 
-                st.subheader("Global Feature Importance")
-                fi = result.get("feature_importance", [])
-                if fi:
-                    df_fi = pd.DataFrame(fi).sort_values("importance", ascending=True)
-                    st.bar_chart(df_fi.set_index("feature")["importance"])
-                else:
-                    st.info("No feature importance data available.")
+            st.subheader("Global Feature Importance")
+            fi = result.get("feature_importance", [])
+            if fi:
+                df_fi = pd.DataFrame(fi).sort_values("importance", ascending=True)
+                st.bar_chart(df_fi.set_index("feature")["importance"])
+            else:
+                st.info("No feature importance data available.")
 
-                st.caption(result.get("disclaimer", ""))
+            st.caption(result.get("disclaimer", ""))
+
+        st.divider()
+        c_exp1, c_exp2 = st.columns(2)
+        with c_exp1:
+            if st.button("← Score Another Applicant", use_container_width=True):
+                _navigate_frontend("🏠 Score Applicant")
+                st.rerun()
+        with c_exp2:
+            if st.button("View Portfolio Dashboard →", use_container_width=True):
+                _navigate_frontend("📈 Dashboard")
+                st.rerun()
 
 
 # ===========================================================================
@@ -342,6 +389,17 @@ elif page == "📈 Dashboard":
 
     st.caption("⚠️ All data is synthetic — prototype demonstration only.")
 
+    st.divider()
+    cd_1, cd_2 = st.columns(2)
+    with cd_1:
+        if st.button("← Score an Applicant", use_container_width=True, key="dash_to_score_btn"):
+            _navigate_frontend("🏠 Score Applicant")
+            st.rerun()
+    with cd_2:
+        if st.button("View Bias Audit →", use_container_width=True, key="dash_to_bias_btn"):
+            _navigate_frontend("⚖️ Bias Audit")
+            st.rerun()
+
 
 # ===========================================================================
 # Page 4 – Bias Audit
@@ -410,4 +468,15 @@ elif page == "⚖️ Bias Audit":
                     st.bar_chart(df_g.set_index("group")["approval_rate"])
 
     st.caption("⚠️ Fairness audit uses synthetic data — prototype demonstration only.")
+
+    st.divider()
+    cb_1, cb_2 = st.columns(2)
+    with cb_1:
+        if st.button("← Back to Dashboard", use_container_width=True, key="bias_to_dash_btn"):
+            _navigate_frontend("📈 Dashboard")
+            st.rerun()
+    with cb_2:
+        if st.button("Score an Applicant →", use_container_width=True, key="bias_to_score_btn"):
+            _navigate_frontend("🏠 Score Applicant")
+            st.rerun()
 

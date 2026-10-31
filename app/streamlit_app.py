@@ -73,7 +73,10 @@ st.markdown(
 
 _DEFAULTS: Dict[str, Any] = {
     "current_page": "🏠 Home",
+    "nav_radio": "🏠 Home",
     "current_applicant_id": None,
+    "applicant_token": None,
+    "lender_token": None,
     "consent_submitted": False,
     "score_result": None,
 }
@@ -86,10 +89,47 @@ for _k, _v in _DEFAULTS.items():
 # ---------------------------------------------------------------------------
 
 
+def _get_lender_token() -> Optional[str]:
+    """Retrieve or automatically authenticate a lender session token."""
+    token = st.session_state.get("lender_token")
+    if not token:
+        try:
+            resp = requests.post(
+                f"{API_BASE}/api/auth/login",
+                json={"username": "lender_admin", "password": "FairScoreUnderwriter2026!"},
+                timeout=5,
+            )
+            if resp.status_code == 200:
+                token = resp.json().get("access_token")
+                st.session_state["lender_token"] = token
+        except Exception:
+            pass
+    return token
+
+
+def _get_auth_headers(path: str) -> Dict[str, str]:
+    """Construct appropriate Authorization header for endpoint role."""
+    headers = {"Accept": "application/json"}
+    if path in ["/api/health", "/api/personas"]:
+        return headers
+
+    is_lender = any(path.startswith(p) for p in ["/api/applicants", "/api/dashboard", "/api/fairness", "/api/thresholds", "/api/model/metrics"])
+    if is_lender:
+        token = _get_lender_token()
+    else:
+        # Prefer applicant's scoped token, fallback to lender session
+        token = st.session_state.get("applicant_token") or _get_lender_token()
+
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
 def _api_get(path: str, params: Optional[Dict] = None) -> Optional[Dict]:
-    """GET request to the FastAPI backend. Returns JSON or None on failure."""
+    """GET request to the FastAPI backend with auth. Returns JSON or None on failure."""
     try:
-        resp = requests.get(f"{API_BASE}{path}", params=params, timeout=10)
+        headers = _get_auth_headers(path)
+        resp = requests.get(f"{API_BASE}{path}", params=params, headers=headers, timeout=10)
         resp.raise_for_status()
         return resp.json()
     except requests.ConnectionError:
@@ -104,9 +144,10 @@ def _api_get(path: str, params: Optional[Dict] = None) -> Optional[Dict]:
 
 
 def _api_post(path: str, json_body: Optional[Dict] = None) -> Optional[Dict]:
-    """POST request to the FastAPI backend. Returns JSON or None on failure."""
+    """POST request to the FastAPI backend with auth. Returns JSON or None on failure."""
     try:
-        resp = requests.post(f"{API_BASE}{path}", json=json_body, timeout=15)
+        headers = _get_auth_headers(path)
+        resp = requests.post(f"{API_BASE}{path}", json=json_body, headers=headers, timeout=15)
         resp.raise_for_status()
         return resp.json()
     except requests.ConnectionError:
@@ -124,6 +165,29 @@ def _api_post(path: str, json_body: Optional[Dict] = None) -> Optional[Dict]:
 # Sidebar
 # ---------------------------------------------------------------------------
 
+_NAV_PAGES = [
+    "🏠 Home",
+    "📝 Applicant Entry",
+    "✅ Consent",
+    "📊 Score Result",
+    "📋 Lender Dashboard",
+    "⚖️ Bias Audit Panel",
+]
+
+def _navigate(page_name: str) -> None:
+    st.session_state["current_page"] = page_name
+    st.session_state["nav_radio"] = page_name
+
+
+# Synchronize current_page with nav_radio before radio renders
+if st.session_state.get("current_page") not in _NAV_PAGES:
+    st.session_state["current_page"] = "🏠 Home"
+if st.session_state.get("nav_radio") != st.session_state["current_page"]:
+    st.session_state["nav_radio"] = st.session_state["current_page"]
+
+def _on_nav_change():
+    st.session_state["current_page"] = st.session_state["nav_radio"]
+
 with st.sidebar:
     st.markdown("# 🎯 FairScore")
     st.caption("Alternative Credit Scoring for the Credit-Invisible")
@@ -131,39 +195,24 @@ with st.sidebar:
 
     page = st.radio(
         "Navigate",
-        [
-            "🏠 Home",
-            "📝 Applicant Entry",
-            "✅ Consent",
-            "📊 Score Result",
-            "📋 Lender Dashboard",
-            "⚖️ Bias Audit Panel",
-        ],
-        index=[
-            "🏠 Home",
-            "📝 Applicant Entry",
-            "✅ Consent",
-            "📊 Score Result",
-            "📋 Lender Dashboard",
-            "⚖️ Bias Audit Panel",
-        ].index(st.session_state["current_page"]),
+        _NAV_PAGES,
         key="nav_radio",
+        on_change=_on_nav_change,
     )
     st.session_state["current_page"] = page
 
     st.divider()
-    if st.session_state["current_applicant_id"]:
-        st.info(f"**Current Applicant**\n\n`{st.session_state['current_applicant_id']}`")
+    if st.session_state.get("current_applicant_id"):
+        st.info(f"**Active Applicant:**\n\n`{st.session_state['current_applicant_id']}`")
+        if st.button("Clear Active Applicant", use_container_width=True):
+            st.session_state["current_applicant_id"] = None
+            st.session_state["applicant_token"] = None
+            st.session_state["consent_submitted"] = False
+            st.session_state["score_result"] = None
+            _navigate("📝 Applicant Entry")
+            st.rerun()
     else:
-        st.caption("No active applicant")
-
-# ---------------------------------------------------------------------------
-# Helper: navigate to page
-# ---------------------------------------------------------------------------
-
-
-def _navigate(page_name: str) -> None:
-    st.session_state["current_page"] = page_name
+        st.caption("No active applicant selected")
 
 
 # ===================================================================
@@ -334,7 +383,9 @@ def page_applicant_entry() -> None:
             result = _api_post("/api/applicant", json_body=payload)
         if result:
             applicant_id = result.get("applicant_id", result.get("id"))
+            auth_token = result.get("auth_token")
             st.session_state["current_applicant_id"] = applicant_id
+            st.session_state["applicant_token"] = auth_token
             st.session_state["consent_submitted"] = False
             st.session_state["score_result"] = None
             st.success(f"✅ Applicant created: `{applicant_id}`")
@@ -384,10 +435,22 @@ def page_consent() -> None:
     """Data consent collection page."""
     applicant_id = st.session_state.get("current_applicant_id")
     if not applicant_id:
-        st.warning("No active applicant. Please create one first.")
-        if st.button("Go to Applicant Entry"):
-            _navigate("📝 Applicant Entry")
-            st.rerun()
+        st.warning("⚠️ No active applicant selected. Create a new profile or select an existing applicant below.")
+        col_c1, col_c2 = st.columns(2)
+        with col_c1:
+            if st.button("➕ Go to Applicant Entry", use_container_width=True, type="primary"):
+                _navigate("📝 Applicant Entry")
+                st.rerun()
+        with col_c2:
+            apps_resp = _api_get("/api/applicants", params={"limit": 20})
+            if apps_resp and isinstance(apps_resp, dict) and "applicants" in apps_resp:
+                app_options = [a["applicant_id"] for a in apps_resp["applicants"]]
+                sel_app = st.selectbox("Or choose from existing applicants:", app_options)
+                if st.button("Load Selected Applicant", use_container_width=True):
+                    st.session_state["current_applicant_id"] = sel_app
+                    st.session_state["consent_submitted"] = False
+                    st.session_state["score_result"] = None
+                    st.rerun()
         return
 
     st.markdown("# ✅ Data Consent Request")
@@ -407,18 +470,20 @@ def page_consent() -> None:
         )
 
     selected_count = sum(consents.values())
-    if selected_count < 2:
-        st.warning("⚠️ Insufficient data for scoring. Please consent to at least 2 data categories.")
+    if selected_count == 0:
+        st.warning("⚠️ Please select at least 1 alternative data category to permit credit scoring.")
+    elif selected_count == 1:
+        st.info("ℹ️ 1 category selected. Adding more data categories improves score precision.")
 
     st.divider()
 
     col_submit, col_score = st.columns(2)
 
     with col_submit:
-        if st.button("Submit Consent", use_container_width=True):
+        if st.button("Submit Consent", use_container_width=True, type="primary"):
             payload = {
                 "applicant_id": applicant_id,
-                "consents": consents,
+                **consents,
             }
             with st.spinner("Saving consent…"):
                 result = _api_post("/api/consent", json_body=payload)
@@ -432,7 +497,7 @@ def page_consent() -> None:
                 st.rerun()
 
     with col_score:
-        can_score = st.session_state.get("consent_submitted", False) and selected_count >= 2
+        can_score = st.session_state.get("consent_submitted", False) and selected_count >= 1
         if st.button("Generate Score →", disabled=not can_score, use_container_width=True):
             with st.spinner("Generating credit score…"):
                 score_result = _api_post("/api/score", json_body={"applicant_id": applicant_id})
@@ -511,10 +576,16 @@ def page_score_result() -> None:
     applicant_id = st.session_state.get("current_applicant_id")
 
     if not result:
-        st.warning("No score available. Please score an applicant first.")
-        if st.button("Go to Applicant Entry"):
-            _navigate("📝 Applicant Entry")
-            st.rerun()
+        st.warning("⚠️ No score available for current view.")
+        c_sc1, c_sc2 = st.columns(2)
+        with c_sc1:
+            if st.button("📝 Create & Score New Applicant", use_container_width=True, type="primary"):
+                _navigate("📝 Applicant Entry")
+                st.rerun()
+        with c_sc2:
+            if st.button("📋 Open Lender Dashboard Queue", use_container_width=True):
+                _navigate("📋 Lender Dashboard")
+                st.rerun()
         return
 
     st.markdown("# 📊 Score Result")
@@ -646,6 +717,22 @@ def page_score_result() -> None:
 def page_dashboard() -> None:
     """Lender dashboard with metrics, charts, and applicant table."""
     st.markdown("# 📋 Lender Dashboard")
+
+    top_d1, top_d2, top_d3 = st.columns(3)
+    with top_d1:
+        if st.button("➕ Score New Applicant", use_container_width=True, key="dash_top_score_btn"):
+            _navigate("📝 Applicant Entry")
+            st.rerun()
+    with top_d2:
+        if st.button("✅ Manage Consent", use_container_width=True, key="dash_top_consent_btn"):
+            _navigate("✅ Consent")
+            st.rerun()
+    with top_d3:
+        if st.button("⚖️ Inspect Bias Audit Panel", use_container_width=True, key="dash_top_bias_btn"):
+            _navigate("⚖️ Bias Audit Panel")
+            st.rerun()
+
+    st.divider()
 
     with st.spinner("Loading dashboard data…"):
         dashboard = _api_get("/api/dashboard")
@@ -987,6 +1074,21 @@ def page_bias_audit() -> None:
         )
         fig.update_layout(height=400, margin=dict(t=20, b=40))
         st.plotly_chart(fig, use_container_width=True)
+
+    st.divider()
+    bb1, bb2, bb3 = st.columns(3)
+    with bb1:
+        if st.button("📋 Back to Lender Dashboard", use_container_width=True, key="bias_back_dash"):
+            _navigate("📋 Lender Dashboard")
+            st.rerun()
+    with bb2:
+        if st.button("📝 Score an Applicant", use_container_width=True, key="bias_to_score"):
+            _navigate("📝 Applicant Entry")
+            st.rerun()
+    with bb3:
+        if st.button("🏠 Return to Home", use_container_width=True, key="bias_to_home"):
+            _navigate("🏠 Home")
+            st.rerun()
 
 
 # ===================================================================

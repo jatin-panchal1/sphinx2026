@@ -1220,6 +1220,15 @@ _WEB_DIR = os.path.join(_PROJECT_ROOT, "app", "web")
 if os.path.isdir(_WEB_DIR):
     app.mount("/static", StaticFiles(directory=_WEB_DIR), name="static")
 
-    @app.get("/", include_in_schema=False)
-    async def serve_index():
-        return FileResponse(os.path.join(_WEB_DIR, "index.html"))
+    @app.get("/{file_path:path}", include_in_schema=False)
+    async def serve_web_files(file_path: str):
+        if not file_path or file_path == "":
+            return FileResponse(os.path.join(_WEB_DIR, "index.html"))
+        target = os.path.join(_WEB_DIR, file_path)
+        if os.path.isfile(target):
+            media_type = "application/javascript" if target.endswith(".js") else None
+            return FileResponse(target, media_type=media_type)
+        index_file = os.path.join(_WEB_DIR, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
+        raise HTTPException(status_code=404, detail="File not found")
