@@ -250,3 +250,4 @@ def test_consent_withdrawal_and_subsequent_scoring_block(client, applicant_a):
     res_score = client.post("/api/score", json={"applicant_id": applicant_a["id"]}, headers=headers_a)
     assert res_score.status_code == 403
     assert "withdrawn" in res_score.json().get("detail", "").lower()
+

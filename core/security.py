@@ -198,3 +198,4 @@ def require_applicant_ownership(applicant_id: str, current_user: Dict[str, Any] 
         status_code=status.HTTP_403_FORBIDDEN,
         detail=f"Forbidden: You do not have permission to access records for applicant {applicant_id}."
     )
+
