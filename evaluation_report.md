@@ -179,3 +179,4 @@ tests/test_backend.py ..........................                  [ 26 passed ]
    - Gig worker incomes fluctuate significantly with seasonal demand and platform algorithm updates. Dynamic models must implement rolling 30-day window retraining.
 3. **Consent & Privacy Compliance:**
    - Alternative data access requires explicit, granular, revocable consent per data category (rent, utility, recharge) compliant with privacy regulations (GDPR, DPDP Act).
+
