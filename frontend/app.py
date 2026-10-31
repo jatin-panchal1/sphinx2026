@@ -65,32 +65,31 @@ def _backend_ok() -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Sidebar navigation
+# Sidebar navigation (with safe deferred page routing)
 # ---------------------------------------------------------------------------
+_FRONTEND_PAGES = ["🏠 Score Applicant", "📊 Explanation", "📈 Dashboard", "⚖️ Bias Audit"]
+
+# Handle programmatic navigation BEFORE the radio widget is instantiated
+if "frontend_target_page" in st.session_state and st.session_state["frontend_target_page"]:
+    st.session_state["frontend_nav"] = st.session_state.pop("frontend_target_page")
+
+if "frontend_nav" not in st.session_state:
+    st.session_state["frontend_nav"] = "🏠 Score Applicant"
+
+def _navigate_frontend(p: str):
+    """Safely queue a page transition and trigger a rerun."""
+    st.session_state["frontend_target_page"] = p
+
 with st.sidebar:
     st.image("https://img.icons8.com/fluency/96/000000/scales.png", width=60)
     st.title("FairScore")
     st.caption("Alternative Credit Scoring")
-    _FRONTEND_PAGES = ["🏠 Score Applicant", "📊 Explanation", "📈 Dashboard", "⚖️ Bias Audit"]
-    if "frontend_page" not in st.session_state:
-        st.session_state["frontend_page"] = "🏠 Score Applicant"
-    if st.session_state.get("frontend_nav") != st.session_state["frontend_page"]:
-        st.session_state["frontend_nav"] = st.session_state["frontend_page"]
-
-    def _on_nav_change():
-        st.session_state["frontend_page"] = st.session_state["frontend_nav"]
-
-    def _navigate_frontend(p: str):
-        st.session_state["frontend_page"] = p
-        st.session_state["frontend_nav"] = p
 
     page = st.radio(
         "Navigation",
         _FRONTEND_PAGES,
         key="frontend_nav",
-        on_change=_on_nav_change,
     )
-    st.session_state["frontend_page"] = page
     st.markdown("---")
     health = _get("/health")
     if "_error" in health:

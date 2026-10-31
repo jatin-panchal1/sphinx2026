@@ -174,19 +174,16 @@ _NAV_PAGES = [
     "⚖️ Bias Audit Panel",
 ]
 
+# Handle programmatic navigation BEFORE the radio widget is instantiated
+if "target_page" in st.session_state and st.session_state["target_page"]:
+    st.session_state["nav_radio"] = st.session_state.pop("target_page")
+
+if "nav_radio" not in st.session_state:
+    st.session_state["nav_radio"] = "🏠 Home"
+
 def _navigate(page_name: str) -> None:
-    st.session_state["current_page"] = page_name
-    st.session_state["nav_radio"] = page_name
-
-
-# Synchronize current_page with nav_radio before radio renders
-if st.session_state.get("current_page") not in _NAV_PAGES:
-    st.session_state["current_page"] = "🏠 Home"
-if st.session_state.get("nav_radio") != st.session_state["current_page"]:
-    st.session_state["nav_radio"] = st.session_state["current_page"]
-
-def _on_nav_change():
-    st.session_state["current_page"] = st.session_state["nav_radio"]
+    """Safely queue a page transition and trigger a rerun."""
+    st.session_state["target_page"] = page_name
 
 with st.sidebar:
     st.markdown("# 🎯 FairScore")
@@ -197,7 +194,6 @@ with st.sidebar:
         "Navigate",
         _NAV_PAGES,
         key="nav_radio",
-        on_change=_on_nav_change,
     )
     st.session_state["current_page"] = page
 
