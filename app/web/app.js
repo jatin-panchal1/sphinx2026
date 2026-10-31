@@ -769,16 +769,16 @@ async function loadModelPerformance() {
     const metrics = await FairAPI.getModelMetrics();
     if (!metrics) return;
 
-    document.getElementById('model-auc-roc').textContent = (metrics.auc_roc || 0.99).toFixed(3);
-    document.getElementById('model-precision').textContent = (metrics.precision || 0.923).toFixed(3);
-    document.getElementById('model-recall').textContent = (metrics.recall || 0.913).toFixed(3);
-    document.getElementById('model-f1').textContent = (metrics.f1_score || 0.918).toFixed(3);
+    document.getElementById('model-auc-roc').textContent = (metrics.auc_roc !== undefined ? Number(metrics.auc_roc).toFixed(3) : '--');
+    document.getElementById('model-precision').textContent = (metrics.precision !== undefined ? Number(metrics.precision).toFixed(3) : '--');
+    document.getElementById('model-recall').textContent = (metrics.recall !== undefined ? Number(metrics.recall).toFixed(3) : '--');
+    document.getElementById('model-f1').textContent = (metrics.f1_score !== undefined ? Number(metrics.f1_score).toFixed(3) : '--');
 
-    const cm = metrics.confusion_matrix || [[320, 18], [12, 150]];
-    document.getElementById('cm-tn').textContent = cm[0] ? cm[0][0] : 320;
-    document.getElementById('cm-fp').textContent = cm[0] ? cm[0][1] : 18;
-    document.getElementById('cm-fn').textContent = cm[1] ? cm[1][0] : 12;
-    document.getElementById('cm-tp').textContent = cm[1] ? cm[1][1] : 150;
+    const cm = metrics.confusion_matrix || [];
+    document.getElementById('cm-tn').textContent = (cm[0] && cm[0][0] !== undefined) ? cm[0][0] : '--';
+    document.getElementById('cm-fp').textContent = (cm[0] && cm[0][1] !== undefined) ? cm[0][1] : '--';
+    document.getElementById('cm-fn').textContent = (cm[1] && cm[1][0] !== undefined) ? cm[1][0] : '--';
+    document.getElementById('cm-tp').textContent = (cm[1] && cm[1][1] !== undefined) ? cm[1][1] : '--';
 
     // Histogram
     renderModelHistogram();
@@ -787,10 +787,27 @@ async function loadModelPerformance() {
   }
 }
 
-function renderModelHistogram() {
+async function renderModelHistogram() {
   const ctx = document.getElementById('chart-model-score-dist');
   if (!ctx) return;
   if (modelScoreDistChart) modelScoreDistChart.destroy();
+
+  let counts = [0, 0, 0, 0, 0, 0];
+  try {
+    const q = await FairAPI.listApplicants(500);
+    const applicants = q.applicants || [];
+    applicants.forEach(a => {
+      const s = a.score || 0;
+      if (s < 450) counts[0]++;
+      else if (s < 550) counts[1]++;
+      else if (s < 650) counts[2]++;
+      else if (s < 750) counts[3]++;
+      else if (s < 850) counts[4]++;
+      else counts[5]++;
+    });
+  } catch (e) {
+    counts = [0, 0, 0, 0, 0, 0];
+  }
 
   modelScoreDistChart = new Chart(ctx, {
     type: 'bar',
@@ -798,7 +815,7 @@ function renderModelHistogram() {
       labels: ['300-450', '450-550', '550-650', '650-750', '750-850', '850-900'],
       datasets: [{
         label: 'Applicants',
-        data: [42, 115, 340, 780, 560, 163],
+        data: counts,
         backgroundColor: '#245B45',
         borderRadius: 4
       }]
@@ -856,17 +873,18 @@ async function refreshAuditTrail() {
     tbody.innerHTML = '';
     const now = new Date().toISOString();
 
-    sample.slice(0, 8).forEach((a, idx) => {
+    sample.slice(0, 10).forEach((a, idx) => {
       const tr = document.createElement('tr');
-      const time = new Date(Date.now() - idx * 180000).toISOString().replace('T', ' ').substring(0, 19);
+      const time = a.evaluated_at || new Date(Date.now() - idx * 60000).toISOString().replace('T', ' ').substring(0, 19);
+      const cov = a.data_coverage ? Math.round(a.data_coverage * 100) + '%' : '--';
       tr.innerHTML = `
         <td class="py-2 px-3 text-slate-muted">${time}</td>
         <td class="py-2 px-3 font-semibold text-charcoal">${a.applicant_id}</td>
-        <td class="py-2 px-3 text-primary-forest font-bold">${a.score}</td>
-        <td class="py-2 px-3">Grade ${a.risk_grade}</td>
-        <td class="py-2 px-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#EAF2ED] text-prime-green">${a.recommendation}</span></td>
-        <td class="py-2 px-3">83%</td>
-        <td class="py-2 px-3 text-slate-muted">GBDT-v3.4</td>
+        <td class="py-2 px-3 text-primary-forest font-bold">${a.score || '--'}</td>
+        <td class="py-2 px-3">Grade ${a.risk_grade || '--'}</td>
+        <td class="py-2 px-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#EAF2ED] text-prime-green">${a.recommendation || '--'}</span></td>
+        <td class="py-2 px-3">${cov}</td>
+        <td class="py-2 px-3 text-slate-muted">${a.model_version || 'GBDT-v3.4'}</td>
       `;
       tbody.appendChild(tr);
     });

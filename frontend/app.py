@@ -329,20 +329,7 @@ elif page == "📈 Dashboard":
 
     if "_error" in metrics:
         st.warning(f"Could not reach backend: {metrics['_error']}")
-        # Demo values
-        metrics = {
-            "active_model": {
-                "n_rows": 5_000,
-                "test_metrics": {
-                    "roc_auc": 0.85,
-                    "f1": 0.72,
-                    "accuracy": 0.83,
-                    "actual_default_rate": 0.18,
-                    "approval_rate_at_0.5": 0.82,
-                },
-            },
-            "dataset_metrics": {"default_rate": 0.18},
-        }
+        metrics = {}
 
     am  = metrics.get("active_model", {})
     tm  = am.get("test_metrics", {})
@@ -357,15 +344,14 @@ elif page == "📈 Dashboard":
 
     st.markdown("---")
 
-    # Risk distribution (synthetic demo)
-    import numpy as np
-
+    # Risk distribution
     st.subheader("Risk Grade Distribution")
-    grade_counts = pd.DataFrame({
-        "Grade": ["A", "B", "C", "D", "E"],
-        "Count": [1400, 1600, 900, 700, 400],
-    })
-    st.bar_chart(grade_counts.set_index("Grade")["Count"])
+    grade_dist = am.get("grade_distribution", {})
+    if grade_dist:
+        grade_counts = pd.DataFrame(list(grade_dist.items()), columns=["Grade", "Count"])
+        st.bar_chart(grade_counts.set_index("Grade")["Count"])
+    else:
+        st.info("Grade distribution data not yet populated.")
 
     st.subheader("Model Performance")
     mp1, mp2, mp3 = st.columns(3)
@@ -386,7 +372,7 @@ elif page == "📈 Dashboard":
         ])
         st.dataframe(df_thr[["Threshold", "Approval Rate"]], use_container_width=True)
 
-    st.caption("⚠️ All data is synthetic — prototype demonstration only.")
+    st.caption("FairScore Model Dashboard.")
 
     st.divider()
     cd_1, cd_2 = st.columns(2)
@@ -466,7 +452,7 @@ elif page == "⚖️ Bias Audit":
                 if "group" in df_g.columns and "approval_rate" in df_g.columns:
                     st.bar_chart(df_g.set_index("group")["approval_rate"])
 
-    st.caption("⚠️ Fairness audit uses synthetic data — prototype demonstration only.")
+    st.caption("FairScore Algorithmic Fairness Audit.")
 
     st.divider()
     cb_1, cb_2 = st.columns(2)
