@@ -194,3 +194,57 @@ python tests/test_demo_script.py
 - **Data Minimization:** Only consented categories are used to extract features. Non-consented fields are blanked.
 - **Human-in-the-Loop:** Borderline cases (uncertain model confidence or data gaps) automatically escalate to **Manual Review**.
 - **Auditability:** Transparent SHAP reason codes allow lenders to provide Adverse Action Notices as required by global credit regulations.
+
+
+---
+
+## 🔬 Standalone Alternative Credit Scikit-Learn Pipeline & CLI
+
+In addition to the full FairScore web suite, an autonomous scikit-learn training, evaluation, and serving pipeline is available under `scripts/`, `backend/`, and `frontend/`:
+
+### 1. Ingestion, Profiling & Model Training
+```bash
+# Scan data/raw, preprocess, and train balanced Random Forest models
+python scripts/train_model.py
+
+# Run deep structural & statistical dataset analysis
+python scripts/analyze_datasets.py
+
+# Evaluate test-set performance, ROC-AUC, PR-AUC, and SHAP importances
+python scripts/evaluate_model.py
+
+# Run demographic fairness audit (disparate impact ratio & approval gaps)
+python scripts/fairness_audit.py
+```
+
+### 2. Standalone Backend API (FastAPI)
+```bash
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8001 --reload
+```
+Exposes:
+- `GET /health` — Service health & model status
+- `GET /models` — List of available trained models & CV metrics
+- `POST /predict` — Credit score (300-900), risk grade (A-E), recommendation, top factors
+- `POST /explain` — Local SHAP feature attribution
+- `GET /metrics` — Ingestion & evaluation benchmark metrics
+- `GET /fairness` — Disparate impact ratio, group approval rates, and bias alerts
+
+### 3. Streamlit Alternative Credit Portal
+```bash
+streamlit run frontend/app.py
+```
+Four interactive pages:
+1. **Applicant Scoring:** Granular consent, applicant inputs, credit score gauge (300-900), risk grade.
+2. **Explanation:** Top positive & negative factors, SHAP waterfall, financial coaching.
+3. **Analytics Dashboard:** Portfolio approval rates, risk distributions, predicted defaults.
+4. **Fairness & Bias Audit:** Disparate impact ratios, approval gaps across protected groups.
+
+### 4. Automated Testing Suite (67 Tests)
+```bash
+python -m pytest -s tests/test_data.py tests/test_model.py tests/test_backend.py
+```
+- `tests/test_data.py`: 25 passed
+- `tests/test_model.py`: 16 passed
+- `tests/test_backend.py`: 26 passed
+
+Full evaluation documentation: [evaluation_report.md](evaluation_report.md)
