@@ -250,3 +250,4 @@ INFO:fairscore.api:✅ Startup complete – ready to serve requests.
 3. **CDP Screenshot Capture Execution on Windows:**
    * *Observation:* Standard headless Chrome commands encountered local file permissions when executing from restricted working directories without an explicit user-data-dir.
    * *Resolution:* Executed headless Chrome via CDP with dedicated temporary profile directories, capturing 32 PNG screenshots across 4 viewports without error.
+
