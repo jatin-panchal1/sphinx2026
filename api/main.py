@@ -30,8 +30,12 @@ from api.schemas import (
     ApplicantCreate,
     ApplicantDetailResponse,
     ApplicantResponse,
+    AuthLoginRequest,
+    AuthRegisterRequest,
+    AuthTokenResponse,
     ConsentResponse,
     ConsentSubmit,
+    ConsentWithdrawRequest,
     DashboardSummaryResponse,
     ExplanationResponse,
     FairnessSummaryResponse,
@@ -40,6 +44,15 @@ from api.schemas import (
     ScoreResponse,
     ThresholdUpdate,
 )
+from core.security import (
+    authenticate_user,
+    create_access_token,
+    get_current_user,
+    register_user,
+    require_applicant_ownership,
+    require_lender,
+)
+from fastapi import Depends
 from data.synthetic_generator import generate_full_dataset, generate_single_applicant
 from core.feature_engineering import FeatureEngineer
 from core.scoring_model import CreditScoringModel
@@ -390,6 +403,73 @@ async def startup() -> None:
 # =========================================================================
 
 
+
+# =========================================================================
+#  Authentication & Session Endpoints
+# =========================================================================
+
+
+@app.post("/api/auth/register", response_model=AuthTokenResponse)
+async def api_register(req: AuthRegisterRequest) -> AuthTokenResponse:
+    """Register a new user account (role: 'applicant' or 'lender')."""
+    user = register_user(
+        username=req.username,
+        password=req.password,
+        role=req.role,
+        applicant_id=req.applicant_id,
+    )
+    token = create_access_token(
+        user_id=user["user_id"],
+        role=user["role"],
+        applicant_id=user.get("applicant_id"),
+    )
+    return AuthTokenResponse(
+        access_token=token,
+        token_type="Bearer",
+        user_id=user["user_id"],
+        username=user["username"],
+        role=user["role"],
+        applicant_id=user.get("applicant_id"),
+        message="Registration successful.",
+    )
+
+
+@app.post("/api/auth/login", response_model=AuthTokenResponse)
+async def api_login(req: AuthLoginRequest) -> AuthTokenResponse:
+    """Authenticate user and return a cryptographically signed Bearer token."""
+    user = authenticate_user(req.username, req.password)
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token = create_access_token(
+        user_id=user["user_id"],
+        role=user["role"],
+        applicant_id=user.get("applicant_id"),
+    )
+    return AuthTokenResponse(
+        access_token=token,
+        token_type="Bearer",
+        user_id=user["user_id"],
+        username=user["username"],
+        role=user["role"],
+        applicant_id=user.get("applicant_id"),
+        message="Login successful.",
+    )
+
+
+@app.get("/api/auth/me")
+async def api_get_me(current_user: dict = Depends(get_current_user)) -> dict:
+    """Return currently authenticated session metadata."""
+    return {
+        "authenticated": True,
+        "user_id": current_user.get("user_id"),
+        "role": current_user.get("role"),
+        "applicant_id": current_user.get("applicant_id"),
+    }
+
 # ---- Applicant Management ------------------------------------------------
 
 
@@ -439,14 +519,22 @@ async def create_applicant(applicant: ApplicantCreate) -> ApplicantResponse:
     applicant_store[app_id] = applicant_data
     score_counter += 1
 
+    # Issue an isolated auth token scoped to this new applicant ID
+    auth_token = create_access_token(user_id=f"usr-{app_id.lower()}", role="applicant", applicant_id=app_id)
+
     return ApplicantResponse(
         applicant_id=app_id,
         message=f"Applicant {app_id} created successfully. Submit consent to proceed.",
+        auth_token=auth_token,
     )
 
 
 @app.get("/api/applicant/{applicant_id}", response_model=ApplicantDetailResponse)
-async def get_applicant_detail(applicant_id: str) -> ApplicantDetailResponse:
+async def get_applicant_detail(
+    applicant_id: str,
+    current_user: dict = Depends(get_current_user),
+) -> ApplicantDetailResponse:
+    require_applicant_ownership(applicant_id, current_user)
     """Return full detail for an applicant: profile, consent, score, explanation."""
     profile = _get_applicant_profile(applicant_id)
 
@@ -472,6 +560,7 @@ async def list_applicants(
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     risk_grade: Optional[str] = Query(None, description="Filter by risk grade (A-E)"),
+    current_user: dict = Depends(require_lender),
 ) -> dict:
     """List applicants with pagination and optional risk-grade filter."""
     if features_df is None:
@@ -538,8 +627,12 @@ async def list_applicants(
 
 
 @app.post("/api/consent", response_model=ConsentResponse)
-async def submit_consent(consent: ConsentSubmit) -> ConsentResponse:
+async def submit_consent(
+    consent: ConsentSubmit,
+    current_user: dict = Depends(get_current_user),
+) -> ConsentResponse:
     """Submit or update data-sharing consent for an applicant."""
+    require_applicant_ownership(consent.applicant_id, current_user)
     if consent_manager is None:
         raise HTTPException(status_code=503, detail="System not initialised yet")
 
@@ -578,7 +671,11 @@ async def submit_consent(consent: ConsentSubmit) -> ConsentResponse:
 
 
 @app.get("/api/consent/{applicant_id}")
-async def get_consent_status(applicant_id: str) -> dict:
+async def get_consent_status(
+    applicant_id: str,
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    require_applicant_ownership(applicant_id, current_user)
     """Get the current consent status for an applicant."""
     if consent_manager is None:
         raise HTTPException(status_code=503, detail="System not initialised yet")
@@ -591,21 +688,38 @@ async def get_consent_status(applicant_id: str) -> dict:
     return status
 
 
+
+@app.post("/api/consent/withdraw")
+async def withdraw_consent_endpoint(
+    req: ConsentWithdrawRequest,
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    """Revoke consent for specific or all data categories."""
+    require_applicant_ownership(req.applicant_id, current_user)
+    if consent_manager is None:
+        raise HTTPException(status_code=503, detail="System not initialised yet")
+    return consent_manager.withdraw_consent(req.applicant_id, req.category)
+
 # ---- Scoring & Explanation -----------------------------------------------
 
 
 @app.post("/api/score", response_model=ScoreResponse)
-async def generate_score(request: ScoreRequest) -> ScoreResponse:
+async def generate_score(
+    request: ScoreRequest,
+    current_user: dict = Depends(get_current_user),
+) -> ScoreResponse:
     """Generate an alternative credit score for an applicant.
 
     Pipeline:
-    1. Verify consent exists and is sufficient.
-    2. Gather / engineer features (respecting consent).
-    3. Run model prediction.
-    4. Generate SHAP explanation.
-    5. Run decision engine for recommendation.
-    6. Return full response.
+    1. Verify applicant ownership (BOLA prevention).
+    2. Verify explicit consent exists (at least 1 category).
+    3. Gather / engineer features (respecting consented categories only).
+    4. Run model prediction.
+    5. Generate SHAP explanation.
+    6. Run decision engine for recommendation.
+    7. Return full response with demonstration disclaimers.
     """
+    require_applicant_ownership(request.applicant_id, current_user)
     if model is None or explainer is None or feature_engineer is None or consent_manager is None or decision_engine is None:
         raise HTTPException(status_code=503, detail="System not initialised yet")
 
@@ -620,36 +734,25 @@ async def generate_score(request: ScoreRequest) -> ScoreResponse:
             detail=f"No consent found for {app_id}. Submit consent first via POST /api/consent.",
         )
 
-    # Explicit consent gate: status must be "active" and sufficient_data must be True
     _consent_status_val = consent_status.get("status", "not_submitted")
-    _sufficient = consent_status.get("sufficient_data", False)
+    _consented_categories = consent_status.get("categories", [])
 
     if _consent_status_val == "not_submitted":
         raise HTTPException(
             status_code=403,
             detail=(
                 f"Applicant {app_id} has not submitted consent. "
-                "Scoring requires explicit consent with at least 2 data categories. "
+                "Scoring requires explicit consent for at least one data category. "
                 "Submit consent via POST /api/consent first."
             ),
         )
 
-    if _consent_status_val == "revoked":
+    if _consent_status_val == "revoked" or not _consented_categories:
         raise HTTPException(
             status_code=403,
             detail=(
-                f"Consent for applicant {app_id} has been withdrawn. "
-                "Scoring cannot proceed without active consent."
-            ),
-        )
-
-    if not _sufficient:
-        raise HTTPException(
-            status_code=403,
-            detail=(
-                f"Insufficient consent for applicant {app_id}. "
-                "At least 2 data categories must be consented for alternative credit scoring. "
-                "Update consent via POST /api/consent."
+                f"Consent for applicant {app_id} has been withdrawn or zero categories were selected. "
+                "Alternative credit scoring cannot proceed without active authorization for at least one data category."
             ),
         )
 
@@ -799,7 +902,11 @@ async def generate_score(request: ScoreRequest) -> ScoreResponse:
 
 
 @app.get("/api/explanation/{applicant_id}", response_model=ExplanationResponse)
-async def get_explanation(applicant_id: str) -> ExplanationResponse:
+async def get_explanation(
+    applicant_id: str,
+    current_user: dict = Depends(get_current_user),
+) -> ExplanationResponse:
+    require_applicant_ownership(applicant_id, current_user)
     """Get SHAP-based explanation for a previously scored applicant."""
     if explainer is None:
         raise HTTPException(status_code=503, detail="System not initialised yet")
@@ -849,6 +956,7 @@ async def get_explanation(applicant_id: str) -> ExplanationResponse:
 @app.get("/api/fairness", response_model=FairnessSummaryResponse)
 async def get_fairness_summary(
     group_by: Optional[str] = Query(None, description="Demographic column to group by"),
+    current_user: dict = Depends(require_lender),
 ) -> FairnessSummaryResponse:
     """Compute fairness metrics across demographic groups."""
     if fairness_auditor is None or dataset is None or features_df is None:
@@ -915,7 +1023,7 @@ async def get_fairness_summary(
 
 
 @app.get("/api/dashboard", response_model=DashboardSummaryResponse)
-async def get_dashboard_summary() -> DashboardSummaryResponse:
+async def get_dashboard_summary(current_user: dict = Depends(require_lender)) -> DashboardSummaryResponse:
     """Portfolio-level dashboard metrics across all scored applicants."""
     if not predictions_cache:
         raise HTTPException(status_code=503, detail="No predictions available yet")
@@ -1048,7 +1156,10 @@ async def get_model_metrics() -> ModelMetricsResponse:
 
 
 @app.put("/api/thresholds")
-async def update_thresholds(thresholds: ThresholdUpdate) -> dict:
+async def update_thresholds(
+    thresholds: ThresholdUpdate,
+    current_user: dict = Depends(require_lender),
+) -> dict:
     """Update the decision engine thresholds at runtime."""
     if decision_engine is None:
         raise HTTPException(status_code=503, detail="Decision engine not initialised yet")

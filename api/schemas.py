@@ -1,12 +1,42 @@
 """
 FairScore API - Pydantic v2 Request/Response Schemas.
 
-Defines all data models used for API input validation and output serialization.
+Defines all data models used for API input validation and output serialization,
+including authentication, consent, scoring, fairness, and governance.
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from datetime import datetime
+
+
+# =============================================================================
+# Auth Models
+# =============================================================================
+
+class AuthRegisterRequest(BaseModel):
+    """User registration request."""
+    username: str = Field(..., min_length=3, max_length=50, description="Username")
+    password: str = Field(..., min_length=6, description="User password")
+    role: str = Field(default="applicant", description="Role: 'applicant' or 'lender'")
+    applicant_id: Optional[str] = Field(default=None, description="Optional applicant ID mapping")
+
+
+class AuthLoginRequest(BaseModel):
+    """User login request."""
+    username: str = Field(..., description="Username")
+    password: str = Field(..., description="User password")
+
+
+class AuthTokenResponse(BaseModel):
+    """Authentication token response."""
+    access_token: str
+    token_type: str = "Bearer"
+    user_id: str
+    username: str
+    role: str
+    applicant_id: Optional[str] = None
+    message: str
 
 
 # =============================================================================
@@ -52,7 +82,7 @@ class ApplicantCreate(BaseModel):
         ge=5000,
         le=500000,
         description="Loan amount requested in INR (5,000 - 5,00,000)",
-        examples=[50000],
+        examples=[50000.0],
     )
     loan_tenure_months: int = Field(
         ...,
@@ -71,6 +101,13 @@ class ConsentSubmit(BaseModel):
     cashflow_data: bool = Field(default=False, description="Consent to use bank/wallet cashflow data")
     business_data: bool = Field(default=False, description="Consent to use business revenue data")
     self_declared_income: bool = Field(default=False, description="Consent to use self-declared income data")
+
+
+class ConsentWithdrawRequest(BaseModel):
+    """Request body for revoking consent."""
+
+    applicant_id: str
+    category: Optional[str] = Field(default=None, description="Category to revoke, or None for all")
 
 
 class ScoreRequest(BaseModel):
@@ -127,6 +164,7 @@ class ApplicantResponse(BaseModel):
 
     applicant_id: str
     message: str
+    auth_token: Optional[str] = None
 
 
 class ConsentResponse(BaseModel):
@@ -155,6 +193,7 @@ class ScoreResponse(BaseModel):
     positive_factors: list[dict]
     negative_factors: list[dict]
     summary_text: str
+    demonstration_notice: str = "PROTOTYPE DEMONSTRATION ONLY: Score generated from synthetic behavioral model. Not a commitment or guarantee to lend."
 
 
 class ExplanationResponse(BaseModel):
@@ -203,6 +242,7 @@ class ModelMetricsResponse(BaseModel):
     confusion_matrix: list
     approval_rate: float
     predicted_default_rate: float
+    model_validation_status: str = "SYNTHETIC PROTOTYPE: Metrics reflect synthetic generation distribution and do not constitute real-world credit risk predictive validity."
 
 
 class ApplicantDetailResponse(BaseModel):

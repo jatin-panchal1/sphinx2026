@@ -2,6 +2,8 @@
 
 Handles explicit, granular consent collection, storage, audit receipt generation,
 and verification before alternative data is used in scoring.
+Supports single-category or multi-category granular opt-in without forcing
+a mandatory two-category requirement.
 """
 
 from datetime import datetime, timezone
@@ -54,8 +56,8 @@ class ConsentManager:
             "applicant_id": applicant_id,
             "occupation_type": occupation_type,
             "categories": categories,
-            "minimum_required_categories": 2,
-            "notice": "FairScore will only access and score data categories that you explicitly approve.",
+            "minimum_required_categories": 1,
+            "notice": "FairScore will only access and score data categories that you explicitly approve. You may select any combination or choose none.",
         }
 
     def submit_consent(self, applicant_id: str, consents: Dict[str, bool]) -> Dict[str, Any]:
@@ -76,7 +78,10 @@ class ConsentManager:
             for cat in self.DATA_CATEGORIES
         }
         consented_list = [k for k, v in valid_consents.items() if v]
-        sufficient = len(consented_list) >= 2
+        
+        # Valid consent exists if at least 1 category is consented
+        has_valid_consent = len(consented_list) >= 1
+        sufficient = has_valid_consent
 
         record = {
             "applicant_id": applicant_id,
@@ -85,7 +90,7 @@ class ConsentManager:
             "categories": consented_list,  # alias
             "sufficient_data": sufficient,
             "timestamp": now_iso,
-            "consent_version": "v1.0",
+            "consent_version": "v2.0",
             "status": "active" if consented_list else "revoked",
             **valid_consents,  # flat boolean keys for direct attribute access
         }
@@ -100,9 +105,9 @@ class ConsentManager:
             "timestamp": now_iso,
             "receipt_id": f"REC-{applicant_id}-{int(datetime.now().timestamp())}",
             "message": (
-                "Consent recorded successfully."
-                if sufficient
-                else "Warning: Fewer than 2 categories consented. More data needed for accurate scoring."
+                f"Consent recorded successfully for {len(consented_list)} categories."
+                if has_valid_consent
+                else "Zero categories consented. No alternative data will be accessed."
             ),
         }
 
@@ -153,15 +158,13 @@ class ConsentManager:
         }
 
     def has_sufficient_data(self, applicant_id: str) -> Tuple[bool, str]:
-        """Check if enough data categories are consented (minimum 2)."""
+        """Check if enough data categories are consented (any valid category accepted)."""
         categories = self.get_consented_categories(applicant_id)
         count = len(categories)
-        if count >= 2:
-            return True, f"Sufficient data consented ({count} categories: {', '.join(categories)})."
-        elif count == 1:
-            return False, f"Only 1 category consented ({categories[0]}). Minimum 2 required to compute an alternative credit score."
+        if count >= 1:
+            return True, f"Consent active for {count} categories: {', '.join(categories)}."
         else:
-            return False, "No data categories consented. Alternative credit scoring requires at least 2 categories."
+            return False, "No data categories consented. Alternative credit scoring requires at least 1 consented data category."
 
     def withdraw_consent(self, applicant_id: str, category: Optional[str] = None) -> Dict[str, Any]:
         """Withdraw consent for a category, or withdraw all if category is None."""
@@ -175,7 +178,9 @@ class ConsentManager:
                 record[category] = False
                 record["consented_categories"] = [k for k, v in record["consents"].items() if v]
                 record["categories"] = record["consented_categories"]
-                record["sufficient_data"] = len(record["consented_categories"]) >= 2
+                record["sufficient_data"] = len(record["consented_categories"]) >= 1
+                if not record["consented_categories"]:
+                    record["status"] = "revoked"
         else:
             for cat in self.DATA_CATEGORIES:
                 record["consents"][cat] = False

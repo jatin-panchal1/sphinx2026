@@ -1,6 +1,7 @@
 """Direct Python test runner for FairScore API & Core Modules.
 
-Executes startup, initializes models and datasets, and verifies all endpoints.
+Executes startup, initializes models and datasets, and verifies all endpoints
+with secure session context.
 """
 
 import asyncio
@@ -28,6 +29,7 @@ from api.main import (
     health_check,
 )
 from api.schemas import ApplicantCreate, ConsentSubmit, ScoreRequest, ThresholdUpdate
+from core.security import create_access_token
 
 
 async def run_all_tests():
@@ -36,6 +38,9 @@ async def run_all_tests():
     print("=" * 60)
     await startup()
     print("✅ Startup succeeded!\n")
+
+    # Mock authenticated user credentials
+    lender_user = {"user_id": "usr-test-lender", "role": "lender", "applicant_id": None}
 
     # 1. Health check
     print("1. Testing Health Check...")
@@ -57,13 +62,13 @@ async def run_all_tests():
 
     # 4. Dashboard summary
     print("\n4. Testing Dashboard Summary...")
-    dash = await get_dashboard_summary()
+    dash = await get_dashboard_summary(current_user=lender_user)
     print(f"   ✅ Total applicants: {dash.total_applicants}, Approval rate: {dash.approval_rate:.1%}, Avg score: {dash.average_score:.0f}")
     assert dash.total_applicants >= 1000
 
     # 5. Fairness summary & bias alerts
     print("\n5. Testing Fairness Summary & Bias Alerts...")
-    fairness = await get_fairness_summary()
+    fairness = await get_fairness_summary(current_user=lender_user)
     assert "urban_rural" in fairness.group_metrics
     alerts = fairness.bias_alerts
     print(f"   ✅ Detected {len(alerts)} bias alerts across demographics.")
@@ -87,7 +92,9 @@ async def run_all_tests():
     )
     app_res = await create_applicant(applicant_req)
     app_id = app_res.applicant_id
-    print(f"   ✅ Created Applicant: {app_id}")
+    auth_token = app_res.auth_token
+    applicant_user = {"user_id": f"usr-{app_id.lower()}", "role": "applicant", "applicant_id": app_id}
+    print(f"   ✅ Created Applicant: {app_id} (Issued Token: {auth_token[:20]}...)")
 
     # 7. Consent Submission
     print("\n7. Testing Consent Management...")
@@ -100,23 +107,24 @@ async def run_all_tests():
         business_data=False,
         self_declared_income=True,
     )
-    c_res = await submit_consent(consent_req)
+    c_res = await submit_consent(consent_req, current_user=applicant_user)
     assert c_res.sufficient_data is True
     print(f"   ✅ Consent submitted with {len(c_res.consented_categories)} categories: {c_res.consented_categories}")
 
     # 8. Alternative Credit Scoring
     print("\n8. Testing Alternative Credit Scoring Engine...")
-    score_res = await generate_score(ScoreRequest(applicant_id=app_id))
+    score_res = await generate_score(ScoreRequest(applicant_id=app_id), current_user=applicant_user)
     print(f"   ✅ FairScore Generated: {score_res.score} / 900")
     print(f"   ✅ Risk Grade: {score_res.risk_grade}, Confidence: {score_res.confidence}")
     print(f"   ✅ Default Probability: {score_res.default_probability:.2%}")
     print(f"   ✅ Recommendation: {score_res.recommendation}")
     print(f"   ✅ Reason: {score_res.recommendation_reason}")
     print(f"   ✅ Plain Language Summary: {score_res.summary_text}")
+    print(f"   ✅ Demonstration Notice: {score_res.demonstration_notice}")
 
     # 9. SHAP Explainability
     print("\n9. Testing SHAP Explainability Engine...")
-    expl_res = await get_explanation(app_id)
+    expl_res = await get_explanation(app_id, current_user=applicant_user)
     print(f"   ✅ SHAP Positive Factors (lowering risk): {len(expl_res.positive_factors)}")
     for f in expl_res.positive_factors[:3]:
         print(f"      + {f['label']}: impact={f['impact']:.4f} | {f['reason']}")
@@ -126,14 +134,14 @@ async def run_all_tests():
 
     # 10. List Applicants
     print("\n10. Testing Applicants Listing & Filtering...")
-    listed = await list_applicants(limit=5)
+    listed = await list_applicants(limit=5, current_user=lender_user)
     print(f"   ✅ Retrieved {len(listed['applicants'])} applicants from list. Total available: {listed['total']}")
     sample = listed['applicants'][0]
     print(f"      Sample: ID={sample['applicant_id']} | Occ={sample['occupation']} | Score={sample['score']} | Grade={sample['risk_grade']} | Rec={sample['recommendation']}")
 
     # 11. Thresholds update
     print("\n11. Testing Dynamic Threshold Update...")
-    t_res = await update_thresholds(ThresholdUpdate(approve_max_default_prob=0.18))
+    t_res = await update_thresholds(ThresholdUpdate(approve_max_default_prob=0.18), current_user=lender_user)
     print(f"   ✅ Threshold updated: {t_res}")
 
     print("\n" + "=" * 60)
