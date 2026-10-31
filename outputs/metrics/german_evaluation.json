@@ -1,0 +1,151 @@
+{
+  "dataset_name": "german",
+  "file_path": "D:\\fairscore (1)\\fairscore\\data\\raw\\german.data",
+  "target_col": "1.1",
+  "feature_cols": [
+    "A11",
+    "feat_6",
+    "A34",
+    "A43",
+    "feat_1169",
+    "A65",
+    "A75",
+    "feat_4",
+    "A93",
+    "A101",
+    "4.1",
+    "A121",
+    "feat_67",
+    "A143",
+    "A152",
+    "feat_2",
+    "A173",
+    "feat_1",
+    "A192",
+    "A201"
+  ],
+  "n_rows": 999,
+  "n_cols": 20,
+  "default_rate": 0.3003003003003003,
+  "model_version": "1.0.0",
+  "model_type": "RandomForestClassifier",
+  "timestamp": "2026-10-31T03:43:55.236503+00:00",
+  "test_metrics": {
+    "roc_auc": 0.7851785714285713,
+    "avg_precision": 0.6180146664161975,
+    "accuracy": 0.74,
+    "precision": 0.6052631578947368,
+    "recall": 0.38333333333333336,
+    "f1": 0.46938775510204084,
+    "confusion_matrix": [
+      [
+        125,
+        15
+      ],
+      [
+        37,
+        23
+      ]
+    ],
+    "predicted_default_rate": 0.19,
+    "actual_default_rate": 0.3,
+    "approval_rate_at_0.35": 0.575,
+    "approval_rate_at_0.5": 0.81,
+    "approval_rate_at_0.65": 0.95
+  },
+  "cv_metrics": {
+    "cv_roc_auc_mean": 0.7879589756766014,
+    "cv_roc_auc_std": 0.04075593786943572,
+    "cv_f1_mean": 0.48263826061578874,
+    "cv_f1_std": 0.05976009985217466
+  },
+  "model_path": "D:\\fairscore (1)\\fairscore\\models\\german_model.joblib",
+  "evaluation": {
+    "roc_auc": 0.7851785714285713,
+    "avg_precision": 0.6180146664161975,
+    "accuracy": 0.74,
+    "precision": 0.6052631578947368,
+    "recall": 0.38333333333333336,
+    "f1": 0.46938775510204084,
+    "confusion_matrix": [
+      [
+        125,
+        15
+      ],
+      [
+        37,
+        23
+      ]
+    ],
+    "classification_report": {
+      "0": {
+        "precision": 0.7716049382716049,
+        "recall": 0.8928571428571429,
+        "f1-score": 0.8278145695364238,
+        "support": 140.0
+      },
+      "1": {
+        "precision": 0.6052631578947368,
+        "recall": 0.38333333333333336,
+        "f1-score": 0.46938775510204084,
+        "support": 60.0
+      },
+      "accuracy": 0.74,
+      "macro avg": {
+        "precision": 0.6884340480831709,
+        "recall": 0.6380952380952382,
+        "f1-score": 0.6486011623192324,
+        "support": 200.0
+      },
+      "weighted avg": {
+        "precision": 0.7217024041585445,
+        "recall": 0.74,
+        "f1-score": 0.7202865252061089,
+        "support": 200.0
+      }
+    },
+    "predicted_default_rate": 0.19,
+    "actual_default_rate": 0.3,
+    "approval_rate_at_0.35": 0.575,
+    "approval_rate_at_0.5": 0.81,
+    "approval_rate_at_0.65": 0.95,
+    "calibration": {
+      "mean_predicted": [
+        0.058709677419354823,
+        0.15311111111111111,
+        0.24777777777777776,
+        0.35015873015873017,
+        0.45061728395061734,
+        0.5421052631578946,
+        0.6422222222222224,
+        0.7344444444444443
+      ],
+      "fraction_positive": [
+        0.03225806451612903,
+        0.1,
+        0.24242424242424243,
+        0.2857142857142857,
+        0.5185185185185185,
+        0.5263157894736842,
+        0.6,
+        1.0
+      ]
+    },
+    "feature_importance": [
+      {
+        "feature": "num__feat_6",
+        "importance": 0.009024783839655555
+      },
+      {
+        "feature": "num__feat_1169",
+        "importance": 0.009024783839655551
+      }
+    ],
+    "cv_metrics": {
+      "cv_roc_auc_mean": 0.7879589756766014,
+      "cv_roc_auc_std": 0.04075593786943572,
+      "cv_f1_mean": 0.48263826061578874,
+      "cv_f1_std": 0.05976009985217466
+    }
+  }
+}

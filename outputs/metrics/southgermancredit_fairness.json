@@ -1,0 +1,169 @@
+{
+  "attributes": {
+    "famges": {
+      "groups": [
+        {
+          "group_col": "famges",
+          "group": "2",
+          "n_total": 64,
+          "n_approved": 51,
+          "n_denied": 13,
+          "approval_rate": 0.796875,
+          "avg_default_probability": 0.3559895833333333,
+          "actual_default_rate": 0.296875,
+          "false_rejection_rate": 0.022222222222222223,
+          "false_approval_rate": 0.3684210526315789
+        },
+        {
+          "group_col": "famges",
+          "group": "3",
+          "n_total": 113,
+          "n_approved": 101,
+          "n_denied": 12,
+          "approval_rate": 0.8938053097345132,
+          "avg_default_probability": 0.2736873156342183,
+          "actual_default_rate": 0.2831858407079646,
+          "false_rejection_rate": 0.04938271604938271,
+          "false_approval_rate": 0.75
+        },
+        {
+          "group_col": "famges",
+          "group": "4",
+          "n_total": 15,
+          "n_approved": 14,
+          "n_denied": 1,
+          "approval_rate": 0.9333333333333333,
+          "avg_default_probability": 0.2757777777777778,
+          "actual_default_rate": 0.4,
+          "false_rejection_rate": 0.0,
+          "false_approval_rate": 0.8333333333333334
+        }
+      ],
+      "disparate_impact_ratio": 0.8537946428571428,
+      "approval_rate_gap": 0.13645833333333335
+    },
+    "alter": {
+      "groups": [
+        {
+          "group_col": "alter",
+          "group": "23",
+          "n_total": 10,
+          "n_approved": 7,
+          "n_denied": 3,
+          "approval_rate": 0.7,
+          "avg_default_probability": 0.43666666666666665,
+          "actual_default_rate": 0.6,
+          "false_rejection_rate": 0.0,
+          "false_approval_rate": 0.5
+        },
+        {
+          "group_col": "alter",
+          "group": "27",
+          "n_total": 13,
+          "n_approved": 12,
+          "n_denied": 1,
+          "approval_rate": 0.9230769230769231,
+          "avg_default_probability": 0.28333333333333327,
+          "actual_default_rate": 0.3076923076923077,
+          "false_rejection_rate": 0.0,
+          "false_approval_rate": 0.75
+        },
+        {
+          "group_col": "alter",
+          "group": "28",
+          "n_total": 12,
+          "n_approved": 9,
+          "n_denied": 3,
+          "approval_rate": 0.75,
+          "avg_default_probability": 0.3055555555555555,
+          "actual_default_rate": 0.25,
+          "false_rejection_rate": 0.2222222222222222,
+          "false_approval_rate": 0.6666666666666666
+        },
+        {
+          "group_col": "alter",
+          "group": "29",
+          "n_total": 10,
+          "n_approved": 7,
+          "n_denied": 3,
+          "approval_rate": 0.7,
+          "avg_default_probability": 0.3086666666666667,
+          "actual_default_rate": 0.4,
+          "false_rejection_rate": 0.0,
+          "false_approval_rate": 0.25
+        },
+        {
+          "group_col": "alter",
+          "group": "31",
+          "n_total": 10,
+          "n_approved": 10,
+          "n_denied": 0,
+          "approval_rate": 1.0,
+          "avg_default_probability": 0.32133333333333336,
+          "actual_default_rate": 0.2,
+          "false_rejection_rate": 0.0,
+          "false_approval_rate": 1.0
+        },
+        {
+          "group_col": "alter",
+          "group": "33",
+          "n_total": 11,
+          "n_approved": 10,
+          "n_denied": 1,
+          "approval_rate": 0.9090909090909091,
+          "avg_default_probability": 0.236969696969697,
+          "actual_default_rate": 0.45454545454545453,
+          "false_rejection_rate": 0.16666666666666666,
+          "false_approval_rate": 1.0
+        }
+      ],
+      "disparate_impact_ratio": 0.7,
+      "approval_rate_gap": 0.30000000000000004
+    },
+    "gastarb": {
+      "groups": [
+        {
+          "group_col": "gastarb",
+          "group": "2",
+          "n_total": 194,
+          "n_approved": 166,
+          "n_denied": 28,
+          "approval_rate": 0.8556701030927835,
+          "avg_default_probability": 0.30283505154639173,
+          "actual_default_rate": 0.30412371134020616,
+          "false_rejection_rate": 0.044444444444444446,
+          "false_approval_rate": 0.6271186440677966
+        }
+      ],
+      "disparate_impact_ratio": 1.0,
+      "approval_rate_gap": 0.0
+    }
+  },
+  "alerts": [
+    {
+      "severity": "MEDIUM",
+      "attribute": "famges",
+      "metric": "approval_rate_gap",
+      "value": 0.1365,
+      "threshold": 0.1,
+      "message": "Approval rate gap of 13.6% between '4' (93.3%) and '2' (79.7%) for attribute 'famges'."
+    },
+    {
+      "severity": "HIGH",
+      "attribute": "alter",
+      "metric": "disparate_impact_ratio",
+      "value": 0.7,
+      "threshold": 0.8,
+      "message": "Disparate impact ratio 0.700 < 0.8 for attribute 'alter'. Possible systemic bias."
+    },
+    {
+      "severity": "HIGH",
+      "attribute": "alter",
+      "metric": "approval_rate_gap",
+      "value": 0.3,
+      "threshold": 0.1,
+      "message": "Approval rate gap of 30.0% between '31' (100.0%) and '23' (70.0%) for attribute 'alter'."
+    }
+  ],
+  "dataset_name": "southgermancredit"
+}

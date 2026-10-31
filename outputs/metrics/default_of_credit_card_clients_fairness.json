@@ -1,0 +1,78 @@
+{
+  "attributes": {
+    "SEX": {
+      "groups": [
+        {
+          "group_col": "SEX",
+          "group": "1",
+          "n_total": 1564,
+          "n_approved": 1352,
+          "n_denied": 212,
+          "approval_rate": 0.8644501278772379,
+          "avg_default_probability": 0.23963128729752772,
+          "actual_default_rate": 0.2608695652173913,
+          "false_rejection_rate": 0.056228373702422146,
+          "false_approval_rate": 0.6397058823529411
+        },
+        {
+          "group_col": "SEX",
+          "group": "2",
+          "n_total": 2436,
+          "n_approved": 2185,
+          "n_denied": 251,
+          "approval_rate": 0.8969622331691297,
+          "avg_default_probability": 0.20977558839627805,
+          "actual_default_rate": 0.19170771756978652,
+          "false_rejection_rate": 0.04824784154393093,
+          "false_approval_rate": 0.6659528907922913
+        }
+      ],
+      "disparate_impact_ratio": 0.9637530945121059,
+      "approval_rate_gap": 0.03251210529189186
+    },
+    "MARRIAGE": {
+      "groups": [
+        {
+          "group_col": "MARRIAGE",
+          "group": "1",
+          "n_total": 1812,
+          "n_approved": 1559,
+          "n_denied": 253,
+          "approval_rate": 0.8603752759381899,
+          "avg_default_probability": 0.23800036791758647,
+          "actual_default_rate": 0.2433774834437086,
+          "false_rejection_rate": 0.06418672501823487,
+          "false_approval_rate": 0.6258503401360545
+        },
+        {
+          "group_col": "MARRIAGE",
+          "group": "2",
+          "n_total": 2131,
+          "n_approved": 1925,
+          "n_denied": 206,
+          "approval_rate": 0.9033317691224777,
+          "avg_default_probability": 0.20692319724698888,
+          "actual_default_rate": 0.1970905678085406,
+          "false_rejection_rate": 0.04149620105201637,
+          "false_approval_rate": 0.6785714285714286
+        },
+        {
+          "group_col": "MARRIAGE",
+          "group": "3",
+          "n_total": 48,
+          "n_approved": 45,
+          "n_denied": 3,
+          "approval_rate": 0.9375,
+          "avg_default_probability": 0.23076388888888888,
+          "actual_default_rate": 0.2916666666666667,
+          "false_rejection_rate": 0.0,
+          "false_approval_rate": 0.7857142857142857
+        }
+      ],
+      "disparate_impact_ratio": 0.9177336276674025,
+      "approval_rate_gap": 0.07712472406181015
+    }
+  },
+  "alerts": [],
+  "dataset_name": "default_of_credit_card_clients"
+}

@@ -1,0 +1,147 @@
+{
+  "dataset_name": "synthetic_alt_credit",
+  "file_path": "synthetic",
+  "target_col": "is_default",
+  "feature_cols": [
+    "monthly_income",
+    "income_volatility",
+    "rent_payment_score",
+    "utility_payment_score",
+    "mobile_recharge_regularity",
+    "cashflow_consistency",
+    "savings_rate",
+    "verified_cash_payments",
+    "months_in_current_job",
+    "num_dependants",
+    "expense_to_income_ratio",
+    "prior_defaults",
+    "loan_amount_requested",
+    "loan_to_income_ratio"
+  ],
+  "n_rows": 5000,
+  "n_cols": 14,
+  "default_rate": 0.2786,
+  "model_version": "1.0.0",
+  "model_type": "RandomForestClassifier",
+  "timestamp": "2026-10-31T03:45:26.421942+00:00",
+  "test_metrics": {
+    "roc_auc": 0.774337712953435,
+    "avg_precision": 0.5664843814995333,
+    "accuracy": 0.763,
+    "precision": 0.6640625,
+    "recall": 0.3046594982078853,
+    "f1": 0.4176904176904177,
+    "confusion_matrix": [
+      [
+        678,
+        43
+      ],
+      [
+        194,
+        85
+      ]
+    ],
+    "predicted_default_rate": 0.128,
+    "actual_default_rate": 0.279,
+    "approval_rate_at_0.35": 0.746,
+    "approval_rate_at_0.5": 0.872,
+    "approval_rate_at_0.65": 0.965
+  },
+  "cv_metrics": {
+    "cv_roc_auc_mean": 0.7519233086774944,
+    "cv_roc_auc_std": 0.014257934769075678,
+    "cv_f1_mean": 0.4019002991154295,
+    "cv_f1_std": 0.022690337166778755
+  },
+  "model_path": "D:\\fairscore (1)\\fairscore\\models\\synthetic_alt_credit_model.joblib",
+  "evaluation": {
+    "roc_auc": 0.774337712953435,
+    "avg_precision": 0.5664843814995333,
+    "accuracy": 0.763,
+    "precision": 0.6640625,
+    "recall": 0.3046594982078853,
+    "f1": 0.4176904176904177,
+    "confusion_matrix": [
+      [
+        678,
+        43
+      ],
+      [
+        194,
+        85
+      ]
+    ],
+    "classification_report": {
+      "0": {
+        "precision": 0.7775229357798165,
+        "recall": 0.9403606102635229,
+        "f1-score": 0.8512241054613936,
+        "support": 721.0
+      },
+      "1": {
+        "precision": 0.6640625,
+        "recall": 0.3046594982078853,
+        "f1-score": 0.4176904176904177,
+        "support": 279.0
+      },
+      "accuracy": 0.763,
+      "macro avg": {
+        "precision": 0.7207927178899083,
+        "recall": 0.622510054235704,
+        "f1-score": 0.6344572615759057,
+        "support": 1000.0
+      },
+      "weighted avg": {
+        "precision": 0.7458674741972477,
+        "recall": 0.763,
+        "f1-score": 0.7302682065732913,
+        "support": 1000.0
+      }
+    },
+    "predicted_default_rate": 0.128,
+    "actual_default_rate": 0.279,
+    "approval_rate_at_0.35": 0.746,
+    "approval_rate_at_0.5": 0.872,
+    "approval_rate_at_0.65": 0.965,
+    "calibration": {
+      "mean_predicted": [
+        0.08045138888888889,
+        0.151630988786952,
+        0.24803278688524574,
+        0.34194225721784766,
+        0.4466255144032921,
+        0.5491794871794874,
+        0.6431007751937984,
+        0.7408888888888889,
+        0.8383333333333334
+      ],
+      "fraction_positive": [
+        0.0625,
+        0.11009174311926606,
+        0.23770491803278687,
+        0.4566929133858268,
+        0.4691358024691358,
+        0.5846153846153846,
+        0.813953488372093,
+        0.5333333333333333,
+        1.0
+      ]
+    },
+    "feature_importance": [
+      {
+        "feature": "num__income_volatility",
+        "importance": 0.03219992766867611
+      },
+      {
+        "feature": "num__monthly_income",
+        "importance": 0.03219992766867607
+      }
+    ],
+    "cv_metrics": {
+      "cv_roc_auc_mean": 0.7519233086774944,
+      "cv_roc_auc_std": 0.014257934769075678,
+      "cv_f1_mean": 0.4019002991154295,
+      "cv_f1_std": 0.022690337166778755
+    }
+  }
+}

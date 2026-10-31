@@ -15,6 +15,14 @@ ENV/
 .coverage
 htmlcov/
 
+# Data & Datasets
+data/
+data/raw/
+data/extracted/
+
+# Models (optional large artefacts)
+*.joblib.bak
+
 # Logs
 *.log
 

@@ -1,0 +1,58 @@
+{
+  "dataset_name": "crx",
+  "file_path": "D:\\fairscore (1)\\fairscore\\data\\raw\\crx.data",
+  "target_col": "+",
+  "feature_cols": [
+    "b",
+    "30.83",
+    "feat_0",
+    "u",
+    "g",
+    "w",
+    "v",
+    "1.25",
+    "t",
+    "t.1",
+    "feat_01",
+    "f",
+    "g.1",
+    "feat_00202",
+    "0.1"
+  ],
+  "n_rows": 689,
+  "n_cols": 15,
+  "default_rate": 0.555878084179971,
+  "model_version": "1.0.0",
+  "model_type": "RandomForestClassifier",
+  "timestamp": "2026-10-31T03:43:36.068791+00:00",
+  "test_metrics": {
+    "roc_auc": 0.9109005748350011,
+    "avg_precision": 0.9121870670340757,
+    "accuracy": 0.8478260869565217,
+    "precision": 0.8888888888888888,
+    "recall": 0.8311688311688312,
+    "f1": 0.8590604026845637,
+    "confusion_matrix": [
+      [
+        53,
+        8
+      ],
+      [
+        13,
+        64
+      ]
+    ],
+    "predicted_default_rate": 0.5217391304347826,
+    "actual_default_rate": 0.5579710144927537,
+    "approval_rate_at_0.35": 0.4057971014492754,
+    "approval_rate_at_0.5": 0.4782608695652174,
+    "approval_rate_at_0.65": 0.5144927536231884
+  },
+  "cv_metrics": {
+    "cv_roc_auc_mean": 0.9270394524482448,
+    "cv_roc_auc_std": 0.02447824473519068,
+    "cv_f1_mean": 0.8814664889289237,
+    "cv_f1_std": 0.0355956166920003
+  },
+  "model_path": "D:\\fairscore (1)\\fairscore\\models\\crx_model.joblib"
+}

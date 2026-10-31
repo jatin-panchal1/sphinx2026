@@ -1,0 +1,1935 @@
+{
+  "analyzed_datasets_count": 6,
+  "skipped_files_count": 2,
+  "datasets": {
+    "SouthGermanCredit": {
+      "dataset_name": "SouthGermanCredit",
+      "raw_filename": "SouthGermanCredit.asc",
+      "raw_file_size_kb": 46.8,
+      "raw_shape": [
+        1000,
+        21
+      ],
+      "processed_shape": [
+        1000,
+        21
+      ],
+      "target_analysis": {
+        "target_col": "kredit",
+        "total_samples": 1000,
+        "default_count_class_1": 300,
+        "non_default_count_class_0": 700,
+        "default_rate": 0.3,
+        "imbalance_ratio": 2.33,
+        "majority_class_baseline_accuracy": 0.7,
+        "top_correlations": [
+          {
+            "feature": "laufkont",
+            "correlation": -0.3508
+          },
+          {
+            "feature": "moral",
+            "correlation": -0.2288
+          },
+          {
+            "feature": "laufzeit",
+            "correlation": 0.2149
+          },
+          {
+            "feature": "sparkont",
+            "correlation": -0.1789
+          },
+          {
+            "feature": "hoehe",
+            "correlation": 0.1547
+          },
+          {
+            "feature": "verm",
+            "correlation": 0.1426
+          },
+          {
+            "feature": "beszeit",
+            "correlation": -0.116
+          },
+          {
+            "feature": "weitkred",
+            "correlation": -0.1098
+          },
+          {
+            "feature": "alter",
+            "correlation": -0.0913
+          },
+          {
+            "feature": "famges",
+            "correlation": -0.0882
+          }
+        ]
+      },
+      "features_summary": {
+        "total_features": 20,
+        "num_features_count": 20,
+        "cat_features_count": 0,
+        "numeric_columns": [
+          "laufkont",
+          "laufzeit",
+          "moral",
+          "verw",
+          "hoehe",
+          "sparkont",
+          "beszeit",
+          "rate",
+          "famges",
+          "buerge",
+          "wohnzeit",
+          "verm",
+          "alter",
+          "weitkred",
+          "wohn",
+          "bishkred",
+          "beruf",
+          "pers",
+          "telef",
+          "gastarb"
+        ],
+        "categorical_columns": []
+      },
+      "signals_and_fairness": {
+        "data_domain": "Traditional / Benchmark Banking Credit Data",
+        "segment_suitability": "Benchmark: Standard banking credit history, collateral, bureau signals, and credit lines.",
+        "alternative_signal_features": [],
+        "traditional_credit_features": [
+          "laufzeit",
+          "hoehe",
+          "sparkont"
+        ],
+        "protected_demographic_attributes": [
+          "famges",
+          "alter",
+          "gastarb"
+        ],
+        "fairness_recommendation": "Exclude ['famges', 'alter', 'gastarb'] from scikit-learn feature inputs to prevent disparate impact. Retain them exclusively for post-training fairness audits (DIR, disparate impact, approval gaps)."
+      },
+      "feature_details": {
+        "laufkont": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 2.0,
+          "mean": 2.577,
+          "max": 4.0,
+          "std": 1.257637727110893,
+          "skewness": 0.006957032644532319
+        },
+        "laufzeit": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 33,
+          "min": 4.0,
+          "median": 18.0,
+          "mean": 20.903,
+          "max": 72.0,
+          "std": 12.058814452756375,
+          "skewness": 1.0941841715555434
+        },
+        "moral": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5,
+          "min": 0.0,
+          "median": 2.0,
+          "mean": 2.545,
+          "max": 4.0,
+          "std": 1.0831196370429945,
+          "skewness": -0.011885973667487457
+        },
+        "verw": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 10,
+          "min": 0.0,
+          "median": 2.0,
+          "mean": 2.828,
+          "max": 10.0,
+          "std": 2.744439459698091,
+          "skewness": 1.178887034381906
+        },
+        "hoehe": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 923,
+          "min": 250.0,
+          "median": 2319.5,
+          "mean": 3271.248,
+          "max": 18424.0,
+          "std": 2822.751759895651,
+          "skewness": 1.9495942869127825
+        },
+        "sparkont": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5,
+          "min": 1.0,
+          "median": 1.0,
+          "mean": 2.105,
+          "max": 5.0,
+          "std": 1.5800226173923813,
+          "skewness": 1.016676876742251
+        },
+        "beszeit": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5,
+          "min": 1.0,
+          "median": 3.0,
+          "mean": 3.384,
+          "max": 5.0,
+          "std": 1.2083062542269671,
+          "skewness": -0.11761469332478254
+        },
+        "rate": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 3.0,
+          "mean": 2.973,
+          "max": 4.0,
+          "std": 1.1187146743126786,
+          "skewness": -0.5313481143125489
+        },
+        "famges": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 3.0,
+          "mean": 2.682,
+          "max": 4.0,
+          "std": 0.7080800642422984,
+          "skewness": -0.3051463823022367
+        },
+        "buerge": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "min": 1.0,
+          "median": 1.0,
+          "mean": 1.145,
+          "max": 3.0,
+          "std": 0.4777061892033671,
+          "skewness": 3.26424877577076
+        },
+        "wohnzeit": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 3.0,
+          "mean": 2.845,
+          "max": 4.0,
+          "std": 1.1037178956568536,
+          "skewness": -0.27256981403372327
+        },
+        "verm": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 2.0,
+          "mean": 2.358,
+          "max": 4.0,
+          "std": 1.0502089977423252,
+          "skewness": 0.04567321190552923
+        },
+        "alter": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 53,
+          "min": 19.0,
+          "median": 33.0,
+          "mean": 35.542,
+          "max": 75.0,
+          "std": 11.352670131696733,
+          "skewness": 1.0247120249859751
+        },
+        "weitkred": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "min": 1.0,
+          "median": 3.0,
+          "mean": 2.675,
+          "max": 3.0,
+          "std": 0.7056010720462893,
+          "skewness": -1.8265175123978103
+        },
+        "wohn": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "min": 1.0,
+          "median": 2.0,
+          "mean": 1.928,
+          "max": 3.0,
+          "std": 0.5301859080521634,
+          "skewness": -0.07383218019618042
+        },
+        "bishkred": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 1.0,
+          "mean": 1.407,
+          "max": 4.0,
+          "std": 0.5776544682461002,
+          "skewness": 1.2725759670020944
+        },
+        "beruf": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 3.0,
+          "mean": 2.904,
+          "max": 4.0,
+          "std": 0.6536139619157559,
+          "skewness": -0.37429485951351316
+        },
+        "pers": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "min": 1.0,
+          "median": 2.0,
+          "mean": 1.845,
+          "max": 2.0,
+          "std": 0.36208577175319395,
+          "skewness": -1.909444721297479
+        },
+        "telef": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "min": 1.0,
+          "median": 1.0,
+          "mean": 1.404,
+          "max": 2.0,
+          "std": 0.49094299569810035,
+          "skewness": 0.39186783643896567
+        },
+        "gastarb": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "min": 1.0,
+          "median": 2.0,
+          "mean": 1.963,
+          "max": 2.0,
+          "std": 0.18885620632287056,
+          "skewness": -4.913027374046528
+        }
+      }
+    },
+    "default of credit card clients": {
+      "dataset_name": "default of credit card clients",
+      "raw_filename": "default of credit card clients.xls",
+      "raw_file_size_kb": 5409.5,
+      "raw_shape": [
+        30000,
+        25
+      ],
+      "processed_shape": [
+        20000,
+        25
+      ],
+      "target_analysis": {
+        "target_col": "default payment next month",
+        "total_samples": 20000,
+        "default_count_class_1": 4374,
+        "non_default_count_class_0": 15626,
+        "default_rate": 0.2187,
+        "imbalance_ratio": 3.57,
+        "majority_class_baseline_accuracy": 0.7813,
+        "top_correlations": [
+          {
+            "feature": "PAY_0",
+            "correlation": 0.3282
+          },
+          {
+            "feature": "PAY_2",
+            "correlation": 0.2629
+          },
+          {
+            "feature": "PAY_3",
+            "correlation": 0.233
+          },
+          {
+            "feature": "PAY_4",
+            "correlation": 0.2132
+          },
+          {
+            "feature": "PAY_5",
+            "correlation": 0.2055
+          },
+          {
+            "feature": "PAY_6",
+            "correlation": 0.1894
+          },
+          {
+            "feature": "LIMIT_BAL",
+            "correlation": -0.1499
+          },
+          {
+            "feature": "PAY_AMT1",
+            "correlation": -0.08
+          },
+          {
+            "feature": "PAY_AMT2",
+            "correlation": -0.0748
+          },
+          {
+            "feature": "PAY_AMT4",
+            "correlation": -0.0603
+          }
+        ]
+      },
+      "features_summary": {
+        "total_features": 24,
+        "num_features_count": 24,
+        "cat_features_count": 0,
+        "numeric_columns": [
+          "ID",
+          "LIMIT_BAL",
+          "SEX",
+          "EDUCATION",
+          "MARRIAGE",
+          "AGE",
+          "PAY_0",
+          "PAY_2",
+          "PAY_3",
+          "PAY_4",
+          "PAY_5",
+          "PAY_6",
+          "BILL_AMT1",
+          "BILL_AMT2",
+          "BILL_AMT3",
+          "BILL_AMT4",
+          "BILL_AMT5",
+          "BILL_AMT6",
+          "PAY_AMT1",
+          "PAY_AMT2",
+          "PAY_AMT3",
+          "PAY_AMT4",
+          "PAY_AMT5",
+          "PAY_AMT6"
+        ],
+        "categorical_columns": []
+      },
+      "signals_and_fairness": {
+        "data_domain": "Traditional / Benchmark Banking Credit Data",
+        "segment_suitability": "Benchmark: Standard banking credit history, collateral, bureau signals, and credit lines.",
+        "alternative_signal_features": [],
+        "traditional_credit_features": [
+          "LIMIT_BAL",
+          "PAY_0",
+          "PAY_2",
+          "PAY_3",
+          "PAY_4",
+          "PAY_5",
+          "PAY_6",
+          "BILL_AMT1",
+          "BILL_AMT2",
+          "BILL_AMT3",
+          "BILL_AMT4",
+          "BILL_AMT5",
+          "BILL_AMT6",
+          "PAY_AMT1",
+          "PAY_AMT2",
+          "PAY_AMT3",
+          "PAY_AMT4",
+          "PAY_AMT5",
+          "PAY_AMT6"
+        ],
+        "protected_demographic_attributes": [
+          "SEX",
+          "MARRIAGE",
+          "AGE"
+        ],
+        "fairness_recommendation": "Exclude ['SEX', 'MARRIAGE', 'AGE'] from scikit-learn feature inputs to prevent disparate impact. Retain them exclusively for post-training fairness audits (DIR, disparate impact, approval gaps)."
+      },
+      "feature_details": {
+        "ID": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 20000,
+          "min": 1.0,
+          "median": 14957.5,
+          "mean": 14959.4069,
+          "max": 30000.0,
+          "std": 8638.343344624556,
+          "skewness": 0.0035701586006672424
+        },
+        "LIMIT_BAL": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 80,
+          "min": 10000.0,
+          "median": 140000.0,
+          "mean": 167552.184,
+          "max": 1000000.0,
+          "std": 129751.566153924,
+          "skewness": 0.9989069536334577
+        },
+        "SEX": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "min": 1.0,
+          "median": 2.0,
+          "mean": 1.60665,
+          "max": 2.0,
+          "std": 0.4885055878753786,
+          "skewness": -0.43668145754687343
+        },
+        "EDUCATION": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 7,
+          "min": 0.0,
+          "median": 2.0,
+          "mean": 1.8611,
+          "max": 6.0,
+          "std": 0.7924255087447308,
+          "skewness": 0.9461508365070519
+        },
+        "MARRIAGE": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 0.0,
+          "median": 2.0,
+          "mean": 1.55525,
+          "max": 3.0,
+          "std": 0.5225524763643626,
+          "skewness": -0.02708234883016297
+        },
+        "AGE": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 56,
+          "min": 21.0,
+          "median": 34.0,
+          "mean": 35.5063,
+          "max": 79.0,
+          "std": 9.218720602690892,
+          "skewness": 0.7421808118969022
+        },
+        "PAY_0": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 11,
+          "min": -2.0,
+          "median": 0.0,
+          "mean": -0.0251,
+          "max": 8.0,
+          "std": 1.1187638587425772,
+          "skewness": 0.730147864422353
+        },
+        "PAY_2": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 11,
+          "min": -2.0,
+          "median": 0.0,
+          "mean": -0.139,
+          "max": 8.0,
+          "std": 1.191028936464759,
+          "skewness": 0.7862467431453457
+        },
+        "PAY_3": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 11,
+          "min": -2.0,
+          "median": 0.0,
+          "mean": -0.1711,
+          "max": 8.0,
+          "std": 1.1958245230026396,
+          "skewness": 0.8771302678680024
+        },
+        "PAY_4": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 11,
+          "min": -2.0,
+          "median": 0.0,
+          "mean": -0.22375,
+          "max": 8.0,
+          "std": 1.1654843865074982,
+          "skewness": 1.047443548402031
+        },
+        "PAY_5": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 10,
+          "min": -2.0,
+          "median": 0.0,
+          "mean": -0.2652,
+          "max": 8.0,
+          "std": 1.135179893968169,
+          "skewness": 1.0525265713301362
+        },
+        "PAY_6": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 10,
+          "min": -2.0,
+          "median": 0.0,
+          "mean": -0.2919,
+          "max": 8.0,
+          "std": 1.1505479468622337,
+          "skewness": 0.9908782021900634
+        },
+        "BILL_AMT1": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 15910,
+          "min": -15308.0,
+          "median": 22321.5,
+          "mean": 51361.84475,
+          "max": 964511.0,
+          "std": 74318.11411447631,
+          "skewness": 2.7307773914600504
+        },
+        "BILL_AMT2": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 15665,
+          "min": -33350.0,
+          "median": 21191.5,
+          "mean": 49280.53665,
+          "max": 983931.0,
+          "std": 71751.02685412654,
+          "skewness": 2.778184664784295
+        },
+        "BILL_AMT3": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 15430,
+          "min": -157264.0,
+          "median": 20148.5,
+          "mean": 46973.9863,
+          "max": 693131.0,
+          "std": 68763.58387932387,
+          "skewness": 2.731922776384848
+        },
+        "BILL_AMT4": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 15106,
+          "min": -170000.0,
+          "median": 19039.0,
+          "mean": 43293.37255,
+          "max": 891586.0,
+          "std": 64685.26056572223,
+          "skewness": 2.8704138704185373
+        },
+        "BILL_AMT5": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 14744,
+          "min": -61372.0,
+          "median": 18164.0,
+          "mean": 40410.29365,
+          "max": 927171.0,
+          "std": 61281.85285618241,
+          "skewness": 2.981012283672673
+        },
+        "BILL_AMT6": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 14491,
+          "min": -339603.0,
+          "median": 17174.5,
+          "mean": 38910.284,
+          "max": 961664.0,
+          "std": 60085.47054573909,
+          "skewness": 2.9698532907951902
+        },
+        "PAY_AMT1": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 6133,
+          "min": 0.0,
+          "median": 2129.5,
+          "mean": 5635.3296,
+          "max": 423903.0,
+          "std": 15109.499183561406,
+          "skewness": 10.4173700128623
+        },
+        "PAY_AMT2": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 6124,
+          "min": 0.0,
+          "median": 2013.0,
+          "mean": 5795.6656,
+          "max": 580464.0,
+          "std": 17503.709029241934,
+          "skewness": 11.4663432161483
+        },
+        "PAY_AMT3": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5879,
+          "min": 0.0,
+          "median": 1866.5,
+          "mean": 5309.4303,
+          "max": 896040.0,
+          "std": 17471.80301681755,
+          "skewness": 15.688953337485737
+        },
+        "PAY_AMT4": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5423,
+          "min": 0.0,
+          "median": 1500.0,
+          "mean": 4873.0293,
+          "max": 528897.0,
+          "std": 15366.265437542603,
+          "skewness": 12.036318624843622
+        },
+        "PAY_AMT5": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5353,
+          "min": 0.0,
+          "median": 1505.0,
+          "mean": 4805.6598,
+          "max": 426529.0,
+          "std": 15027.678706195073,
+          "skewness": 10.965773206670336
+        },
+        "PAY_AMT6": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5428,
+          "min": 0.0,
+          "median": 1500.0,
+          "mean": 5329.67885,
+          "max": 528666.0,
+          "std": 18485.78567573516,
+          "skewness": 10.97937636799525
+        }
+      }
+    },
+    "crx": {
+      "dataset_name": "crx",
+      "raw_filename": "crx.data",
+      "raw_file_size_kb": 31.5,
+      "raw_shape": [
+        689,
+        16
+      ],
+      "processed_shape": [
+        689,
+        16
+      ],
+      "target_analysis": {
+        "target_col": "+",
+        "total_samples": 689,
+        "default_count_class_1": 383,
+        "non_default_count_class_0": 306,
+        "default_rate": 0.5559,
+        "imbalance_ratio": 1.25,
+        "majority_class_baseline_accuracy": 0.5559,
+        "top_correlations": [
+          {
+            "feature": "feat_01",
+            "correlation": -0.4073
+          },
+          {
+            "feature": "1.25",
+            "correlation": -0.3233
+          },
+          {
+            "feature": "feat_0",
+            "correlation": -0.2082
+          },
+          {
+            "feature": "0.1",
+            "correlation": -0.1761
+          }
+        ]
+      },
+      "features_summary": {
+        "total_features": 15,
+        "num_features_count": 4,
+        "cat_features_count": 11,
+        "numeric_columns": [
+          "feat_0",
+          "1.25",
+          "feat_01",
+          "0.1"
+        ],
+        "categorical_columns": [
+          "b",
+          "30.83",
+          "u",
+          "g",
+          "w",
+          "v",
+          "t",
+          "t.1",
+          "f",
+          "g.1",
+          "feat_00202"
+        ]
+      },
+      "signals_and_fairness": {
+        "data_domain": "Traditional / Benchmark Banking Credit Data",
+        "segment_suitability": "Benchmark: Standard banking credit history, collateral, bureau signals, and credit lines.",
+        "alternative_signal_features": [],
+        "traditional_credit_features": [],
+        "protected_demographic_attributes": [],
+        "fairness_recommendation": "No direct protected attributes detected in raw column names. Verify proxy leakage."
+      },
+      "feature_details": {
+        "b": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "most_frequent": "b"
+        },
+        "30.83": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 349,
+          "most_frequent": "?"
+        },
+        "feat_0": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 215,
+          "min": 0.0,
+          "median": 2.75,
+          "mean": 4.765631349782293,
+          "max": 28.0,
+          "std": 4.978470362640535,
+          "skewness": 1.48780649499032
+        },
+        "u": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "most_frequent": "u"
+        },
+        "g": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "most_frequent": "g"
+        },
+        "w": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 15,
+          "most_frequent": "c"
+        },
+        "v": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 10,
+          "most_frequent": "v"
+        },
+        "1.25": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 132,
+          "min": 0.0,
+          "median": 1.0,
+          "mean": 2.224818577648766,
+          "max": 28.5,
+          "std": 3.3487386123842176,
+          "skewness": 2.8885431438736306
+        },
+        "t": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "most_frequent": "t"
+        },
+        "t.1": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "most_frequent": "f"
+        },
+        "feat_01": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 23,
+          "min": 0.0,
+          "median": 0.0,
+          "mean": 2.402031930333817,
+          "max": 67.0,
+          "std": 4.866179730300107,
+          "skewness": 5.148510007949378
+        },
+        "f": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "most_frequent": "f"
+        },
+        "g.1": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "most_frequent": "g"
+        },
+        "feat_00202": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 170,
+          "most_frequent": "00000"
+        },
+        "0.1": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 240,
+          "min": 0.0,
+          "median": 5.0,
+          "mean": 1018.8621190130624,
+          "max": 100000.0,
+          "std": 5213.743148827872,
+          "skewness": 13.131421358555226
+        }
+      }
+    },
+    "german": {
+      "dataset_name": "german",
+      "raw_filename": "german.data",
+      "raw_file_size_kb": 77.9,
+      "raw_shape": [
+        999,
+        21
+      ],
+      "processed_shape": [
+        999,
+        21
+      ],
+      "target_analysis": {
+        "target_col": "1.1",
+        "total_samples": 999,
+        "default_count_class_1": 300,
+        "non_default_count_class_0": 699,
+        "default_rate": 0.3003,
+        "imbalance_ratio": 2.33,
+        "majority_class_baseline_accuracy": 0.6997,
+        "top_correlations": [
+          {
+            "feature": "feat_6",
+            "correlation": 0.2143
+          },
+          {
+            "feature": "feat_1169",
+            "correlation": 0.1543
+          },
+          {
+            "feature": "feat_67",
+            "correlation": -0.0897
+          },
+          {
+            "feature": "feat_4",
+            "correlation": 0.0731
+          },
+          {
+            "feature": "feat_2",
+            "correlation": -0.0451
+          },
+          {
+            "feature": "4.1",
+            "correlation": 0.0037
+          },
+          {
+            "feature": "feat_1",
+            "correlation": -0.0033
+          }
+        ]
+      },
+      "features_summary": {
+        "total_features": 20,
+        "num_features_count": 7,
+        "cat_features_count": 13,
+        "numeric_columns": [
+          "feat_6",
+          "feat_1169",
+          "feat_4",
+          "4.1",
+          "feat_67",
+          "feat_2",
+          "feat_1"
+        ],
+        "categorical_columns": [
+          "A11",
+          "A34",
+          "A43",
+          "A65",
+          "A75",
+          "A93",
+          "A101",
+          "A121",
+          "A143",
+          "A152",
+          "A173",
+          "A192",
+          "A201"
+        ]
+      },
+      "signals_and_fairness": {
+        "data_domain": "Traditional / Benchmark Banking Credit Data",
+        "segment_suitability": "Benchmark: Standard banking credit history, collateral, bureau signals, and credit lines.",
+        "alternative_signal_features": [],
+        "traditional_credit_features": [
+          "A11",
+          "A34",
+          "A43",
+          "A101",
+          "A121",
+          "A143",
+          "A152",
+          "A173",
+          "A192",
+          "A201"
+        ],
+        "protected_demographic_attributes": [],
+        "fairness_recommendation": "No direct protected attributes detected in raw column names. Verify proxy leakage."
+      },
+      "feature_details": {
+        "A11": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "most_frequent": "A14"
+        },
+        "feat_6": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 33,
+          "min": 4.0,
+          "median": 18.0,
+          "mean": 20.91791791791792,
+          "max": 72.0,
+          "std": 12.05561882109701,
+          "skewness": 1.094330919970302
+        },
+        "A34": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5,
+          "most_frequent": "A32"
+        },
+        "A43": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 10,
+          "most_frequent": "A43"
+        },
+        "feat_1169": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 921,
+          "min": 250.0,
+          "median": 2320.0,
+          "mean": 3273.3623623623625,
+          "max": 18424.0,
+          "std": 2823.365811196362,
+          "skewness": 1.948455182636822
+        },
+        "A65": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5,
+          "most_frequent": "A61"
+        },
+        "A75": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 5,
+          "most_frequent": "A73"
+        },
+        "feat_4": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 3.0,
+          "mean": 2.971971971971972,
+          "max": 4.0,
+          "std": 1.1188023295114538,
+          "skewness": -0.5297710532874539
+        },
+        "A93": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "most_frequent": "A93"
+        },
+        "A101": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "most_frequent": "A101"
+        },
+        "4.1": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 3.0,
+          "mean": 2.843843843843844,
+          "max": 4.0,
+          "std": 1.1036647096025511,
+          "skewness": -0.2708846682797521
+        },
+        "A121": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "most_frequent": "A123"
+        },
+        "feat_67": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 53,
+          "min": 19.0,
+          "median": 33.0,
+          "mean": 35.51451451451452,
+          "max": 75.0,
+          "std": 11.337487233645986,
+          "skewness": 1.018975935409114
+        },
+        "A143": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "most_frequent": "A143"
+        },
+        "A152": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "most_frequent": "A152"
+        },
+        "feat_2": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 1.0,
+          "median": 1.0,
+          "mean": 1.4064064064064064,
+          "max": 4.0,
+          "std": 0.577638582214107,
+          "skewness": 1.2759615357348126
+        },
+        "A173": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "most_frequent": "A173"
+        },
+        "feat_1": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "min": 1.0,
+          "median": 1.0,
+          "mean": 1.155155155155155,
+          "max": 2.0,
+          "std": 0.3622338715614039,
+          "skewness": 1.907809495230563
+        },
+        "A192": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "most_frequent": "A191"
+        },
+        "A201": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "most_frequent": "A201"
+        }
+      }
+    },
+    "australian": {
+      "dataset_name": "australian",
+      "raw_filename": "australian.dat",
+      "raw_file_size_kb": 28.1,
+      "raw_shape": [
+        690,
+        15
+      ],
+      "processed_shape": [
+        690,
+        15
+      ],
+      "target_analysis": {
+        "target_col": "feat_14",
+        "total_samples": 690,
+        "default_count_class_1": 307,
+        "non_default_count_class_0": 383,
+        "default_rate": 0.4449,
+        "imbalance_ratio": 1.25,
+        "majority_class_baseline_accuracy": 0.5551,
+        "top_correlations": [
+          {
+            "feature": "feat_7",
+            "correlation": 0.7204
+          },
+          {
+            "feature": "feat_8",
+            "correlation": 0.4583
+          },
+          {
+            "feature": "feat_9",
+            "correlation": 0.4064
+          },
+          {
+            "feature": "feat_4",
+            "correlation": 0.3737
+          },
+          {
+            "feature": "feat_6",
+            "correlation": 0.3225
+          },
+          {
+            "feature": "feat_5",
+            "correlation": 0.2466
+          },
+          {
+            "feature": "feat_2",
+            "correlation": 0.2063
+          },
+          {
+            "feature": "feat_3",
+            "correlation": 0.1943
+          },
+          {
+            "feature": "feat_13",
+            "correlation": 0.1757
+          },
+          {
+            "feature": "feat_1",
+            "correlation": 0.1616
+          }
+        ]
+      },
+      "features_summary": {
+        "total_features": 14,
+        "num_features_count": 14,
+        "cat_features_count": 0,
+        "numeric_columns": [
+          "feat_0",
+          "feat_1",
+          "feat_2",
+          "feat_3",
+          "feat_4",
+          "feat_5",
+          "feat_6",
+          "feat_7",
+          "feat_8",
+          "feat_9",
+          "feat_10",
+          "feat_11",
+          "feat_12",
+          "feat_13"
+        ],
+        "categorical_columns": []
+      },
+      "signals_and_fairness": {
+        "data_domain": "Traditional / Benchmark Banking Credit Data",
+        "segment_suitability": "Benchmark: Standard banking credit history, collateral, bureau signals, and credit lines.",
+        "alternative_signal_features": [],
+        "traditional_credit_features": [],
+        "protected_demographic_attributes": [],
+        "fairness_recommendation": "No direct protected attributes detected in raw column names. Verify proxy leakage."
+      },
+      "feature_details": {
+        "feat_0": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "min": 0.0,
+          "median": 1.0,
+          "mean": 0.6782608695652174,
+          "max": 1.0,
+          "std": 0.4674823918720558,
+          "skewness": -0.7648590529859856
+        },
+        "feat_1": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 350,
+          "min": 13.75,
+          "median": 28.625,
+          "mean": 31.568202898550723,
+          "max": 80.25,
+          "std": 11.85327277297163,
+          "skewness": 1.1559350076287456
+        },
+        "feat_2": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 215,
+          "min": 0.0,
+          "median": 2.75,
+          "mean": 4.758724637681159,
+          "max": 28.0,
+          "std": 4.978163248528541,
+          "skewness": 1.4888131246649203
+        },
+        "feat_3": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "min": 1.0,
+          "median": 2.0,
+          "mean": 1.7666666666666666,
+          "max": 3.0,
+          "std": 0.43006283223619873,
+          "skewness": -1.1534550145401599
+        },
+        "feat_4": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 14,
+          "min": 1.0,
+          "median": 8.0,
+          "mean": 7.372463768115942,
+          "max": 14.0,
+          "std": 3.6832647874312823,
+          "skewness": -0.06919047486430259
+        },
+        "feat_5": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 8,
+          "min": 1.0,
+          "median": 4.0,
+          "mean": 4.6927536231884055,
+          "max": 9.0,
+          "std": 1.9923160695338962,
+          "skewness": 0.4684118266063381
+        },
+        "feat_6": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 132,
+          "min": 0.0,
+          "median": 1.0,
+          "mean": 2.223405797101449,
+          "max": 28.5,
+          "std": 3.3465133592781324,
+          "skewness": 2.8913304241538045
+        },
+        "feat_7": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "min": 0.0,
+          "median": 1.0,
+          "mean": 0.5231884057971015,
+          "max": 1.0,
+          "std": 0.49982433127002757,
+          "skewness": -0.0930559498550079
+        },
+        "feat_8": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "min": 0.0,
+          "median": 0.0,
+          "mean": 0.427536231884058,
+          "max": 1.0,
+          "std": 0.49508001961918136,
+          "skewness": 0.2935865545959738
+        },
+        "feat_9": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 23,
+          "min": 0.0,
+          "median": 0.0,
+          "mean": 2.4,
+          "max": 67.0,
+          "std": 4.862940034226996,
+          "skewness": 5.152519857445965
+        },
+        "feat_10": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2,
+          "min": 0.0,
+          "median": 0.0,
+          "mean": 0.4579710144927536,
+          "max": 1.0,
+          "std": 0.4985918624611388,
+          "skewness": 0.16908082928843604
+        },
+        "feat_11": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "min": 1.0,
+          "median": 2.0,
+          "mean": 1.9289855072463769,
+          "max": 3.0,
+          "std": 0.2988130604118135,
+          "skewness": -1.9447254706547488
+        },
+        "feat_12": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 171,
+          "min": 0.0,
+          "median": 160.0,
+          "mean": 184.0144927536232,
+          "max": 2000.0,
+          "std": 172.15927353629948,
+          "skewness": 2.7499117491023264
+        },
+        "feat_13": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 240,
+          "min": 1.0,
+          "median": 6.0,
+          "mean": 1018.3855072463768,
+          "max": 100001.0,
+          "std": 5210.102598302691,
+          "skewness": 13.140655014445457
+        }
+      }
+    },
+    "synthetic_alt_credit": {
+      "dataset_name": "synthetic_alt_credit",
+      "raw_filename": "Generated on-the-fly (deterministic seed 42)",
+      "raw_file_size_kb": 650.0,
+      "raw_shape": [
+        5000,
+        18
+      ],
+      "processed_shape": [
+        5000,
+        18
+      ],
+      "target_analysis": {
+        "target_col": "is_default",
+        "total_samples": 5000,
+        "default_count_class_1": 1393,
+        "non_default_count_class_0": 3607,
+        "default_rate": 0.2786,
+        "imbalance_ratio": 2.59,
+        "majority_class_baseline_accuracy": 0.7214,
+        "top_correlations": [
+          {
+            "feature": "prior_defaults",
+            "correlation": 0.3598
+          },
+          {
+            "feature": "rent_payment_score",
+            "correlation": -0.153
+          },
+          {
+            "feature": "savings_rate",
+            "correlation": -0.1315
+          },
+          {
+            "feature": "utility_payment_score",
+            "correlation": -0.1065
+          },
+          {
+            "feature": "cashflow_consistency",
+            "correlation": -0.0941
+          },
+          {
+            "feature": "income_volatility",
+            "correlation": 0.0881
+          },
+          {
+            "feature": "mobile_recharge_regularity",
+            "correlation": -0.0566
+          },
+          {
+            "feature": "expense_to_income_ratio",
+            "correlation": 0.0501
+          },
+          {
+            "feature": "months_in_current_job",
+            "correlation": -0.0361
+          },
+          {
+            "feature": "loan_to_income_ratio",
+            "correlation": 0.0253
+          }
+        ]
+      },
+      "features_summary": {
+        "total_features": 17,
+        "num_features_count": 14,
+        "cat_features_count": 3,
+        "numeric_columns": [
+          "monthly_income",
+          "income_volatility",
+          "rent_payment_score",
+          "utility_payment_score",
+          "mobile_recharge_regularity",
+          "cashflow_consistency",
+          "savings_rate",
+          "verified_cash_payments",
+          "months_in_current_job",
+          "num_dependants",
+          "expense_to_income_ratio",
+          "prior_defaults",
+          "loan_amount_requested",
+          "loan_to_income_ratio"
+        ],
+        "categorical_columns": [
+          "occupation",
+          "urban_rural",
+          "age_group"
+        ]
+      },
+      "signals_and_fairness": {
+        "data_domain": "Alternative Credit Scoring (Credit-Invisible / Gig Workers)",
+        "segment_suitability": "High: Directly simulates rent, utility, telecom, and daily cash-flow transactions for informal workers.",
+        "alternative_signal_features": [
+          "rent_payment_score",
+          "utility_payment_score",
+          "mobile_recharge_regularity",
+          "cashflow_consistency",
+          "months_in_current_job"
+        ],
+        "traditional_credit_features": [],
+        "protected_demographic_attributes": [
+          "occupation",
+          "urban_rural",
+          "age_group"
+        ],
+        "fairness_recommendation": "Exclude ['occupation', 'urban_rural', 'age_group'] from scikit-learn feature inputs to prevent disparate impact. Retain them exclusively for post-training fairness audits (DIR, disparate impact, approval gaps)."
+      },
+      "feature_details": {
+        "monthly_income": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4933,
+          "min": 3000.0,
+          "median": 25271.645,
+          "mean": 25384.553194,
+          "max": 57002.43,
+          "std": 9917.64613995303,
+          "skewness": 0.03347348412780483
+        },
+        "income_volatility": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3361,
+          "min": 0.0007,
+          "median": 0.2657,
+          "mean": 0.2880563,
+          "max": 0.9125,
+          "std": 0.16292387760634983,
+          "skewness": 0.5472081346416848
+        },
+        "rent_payment_score": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3383,
+          "min": 0.0932,
+          "median": 0.7332,
+          "mean": 0.71179824,
+          "max": 0.9984,
+          "std": 0.16081890869291782,
+          "skewness": -0.5851310006957805
+        },
+        "utility_payment_score": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3351,
+          "min": 0.1375,
+          "median": 0.73725,
+          "mean": 0.71694392,
+          "max": 0.9978,
+          "std": 0.15837225813084402,
+          "skewness": -0.6232811760641757
+        },
+        "mobile_recharge_regularity": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3495,
+          "min": 0.0865,
+          "median": 0.6832,
+          "mean": 0.6656026399999999,
+          "max": 0.9972,
+          "std": 0.17985080179752283,
+          "skewness": -0.46457189021588324
+        },
+        "cashflow_consistency": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3481,
+          "min": 0.062,
+          "median": 0.68475,
+          "mean": 0.6654618,
+          "max": 0.9973,
+          "std": 0.17753434059127218,
+          "skewness": -0.47765648752899353
+        },
+        "savings_rate": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2397,
+          "min": 0.0031,
+          "median": 0.2625,
+          "mean": 0.25751877999999995,
+          "max": 0.4,
+          "std": 0.11824700547655502,
+          "skewness": -0.2458539708166121
+        },
+        "verified_cash_payments": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 25,
+          "min": 0.0,
+          "median": 12.0,
+          "mean": 12.1312,
+          "max": 24.0,
+          "std": 7.202302492414384,
+          "skewness": -0.028213061633534528
+        },
+        "months_in_current_job": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 119,
+          "min": 1.0,
+          "median": 58.5,
+          "mean": 59.294,
+          "max": 119.0,
+          "std": 34.04306317049049,
+          "skewness": 0.03295058416547573
+        },
+        "num_dependants": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 6,
+          "min": 0.0,
+          "median": 2.0,
+          "mean": 2.5014,
+          "max": 5.0,
+          "std": 1.7278295977971336,
+          "skewness": 0.0049685844731386375
+        },
+        "expense_to_income_ratio": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3106,
+          "min": 0.4003,
+          "median": 0.65875,
+          "mean": 0.6542313200000001,
+          "max": 0.9,
+          "std": 0.1457714398556628,
+          "skewness": -0.04385646342640406
+        },
+        "prior_defaults": {
+          "dtype": "int64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "min": 0.0,
+          "median": 0.0,
+          "mean": 0.3668,
+          "max": 3.0,
+          "std": 0.8445119300992828,
+          "skewness": 2.202196784717976
+        },
+        "loan_amount_requested": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4813,
+          "min": 5000.0,
+          "median": 50175.015,
+          "mean": 50221.533874,
+          "max": 135878.75,
+          "std": 24121.400459603698,
+          "skewness": 0.13099381426484125
+        },
+        "loan_to_income_ratio": {
+          "dtype": "float64",
+          "type_category": "numerical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 2246,
+          "min": 0.1,
+          "median": 0.16405,
+          "mean": 0.22772576,
+          "max": 2.9507,
+          "std": 0.23496846201150146,
+          "skewness": 5.274973910386197
+        },
+        "occupation": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 8,
+          "most_frequent": "Informal Worker"
+        },
+        "urban_rural": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 3,
+          "most_frequent": "Urban"
+        },
+        "age_group": {
+          "dtype": "str",
+          "type_category": "categorical",
+          "missing_count": 0,
+          "missing_pct": 0.0,
+          "unique_count": 4,
+          "most_frequent": "26-35"
+        }
+      }
+    }
+  },
+  "skipped_files": [
+    {
+      "file": "findex_microdata_2025_labelled_update112425.csv",
+      "size_kb": 49242.6,
+      "reason": "No valid binary credit target label detected (e.g. general inclusion survey)."
+    },
+    {
+      "file": "codetable.txt",
+      "size_kb": 3.1,
+      "reason": "Documentation / schema / metadata reference file (non-tabular dataset)."
+    }
+  ]
+}

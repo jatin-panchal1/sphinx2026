@@ -1,0 +1,204 @@
+{
+  "attributes": {
+    "occupation": {
+      "groups": [
+        {
+          "group_col": "occupation",
+          "group": "Daily Wage",
+          "n_total": 96,
+          "n_approved": 84,
+          "n_denied": 12,
+          "approval_rate": 0.875,
+          "avg_default_probability": 0.27534722222222224,
+          "actual_default_rate": 0.23958333333333334,
+          "false_rejection_rate": 0.0684931506849315,
+          "false_approval_rate": 0.6956521739130435
+        },
+        {
+          "group_col": "occupation",
+          "group": "Freelancer",
+          "n_total": 99,
+          "n_approved": 88,
+          "n_denied": 11,
+          "approval_rate": 0.8888888888888888,
+          "avg_default_probability": 0.25673400673400676,
+          "actual_default_rate": 0.30303030303030304,
+          "false_rejection_rate": 0.057971014492753624,
+          "false_approval_rate": 0.7666666666666667
+        },
+        {
+          "group_col": "occupation",
+          "group": "Gig Worker",
+          "n_total": 184,
+          "n_approved": 156,
+          "n_denied": 28,
+          "approval_rate": 0.8478260869565217,
+          "avg_default_probability": 0.28012681159420294,
+          "actual_default_rate": 0.32065217391304346,
+          "false_rejection_rate": 0.072,
+          "false_approval_rate": 0.6779661016949152
+        },
+        {
+          "group_col": "occupation",
+          "group": "Home-Based Business",
+          "n_total": 100,
+          "n_approved": 89,
+          "n_denied": 11,
+          "approval_rate": 0.89,
+          "avg_default_probability": 0.27513333333333334,
+          "actual_default_rate": 0.19,
+          "false_rejection_rate": 0.06172839506172839,
+          "false_approval_rate": 0.6842105263157895
+        },
+        {
+          "group_col": "occupation",
+          "group": "Informal Worker",
+          "n_total": 208,
+          "n_approved": 178,
+          "n_denied": 30,
+          "approval_rate": 0.8557692307692307,
+          "avg_default_probability": 0.28250000000000003,
+          "actual_default_rate": 0.2932692307692308,
+          "false_rejection_rate": 0.06802721088435375,
+          "false_approval_rate": 0.6721311475409836
+        },
+        {
+          "group_col": "occupation",
+          "group": "Seasonal Worker",
+          "n_total": 53,
+          "n_approved": 47,
+          "n_denied": 6,
+          "approval_rate": 0.8867924528301887,
+          "avg_default_probability": 0.26773584905660375,
+          "actual_default_rate": 0.32075471698113206,
+          "false_rejection_rate": 0.027777777777777776,
+          "false_approval_rate": 0.7058823529411765
+        },
+        {
+          "group_col": "occupation",
+          "group": "Small Shopkeeper",
+          "n_total": 160,
+          "n_approved": 142,
+          "n_denied": 18,
+          "approval_rate": 0.8875,
+          "avg_default_probability": 0.2708125,
+          "actual_default_rate": 0.275,
+          "false_rejection_rate": 0.05172413793103448,
+          "false_approval_rate": 0.7272727272727273
+        },
+        {
+          "group_col": "occupation",
+          "group": "Student",
+          "n_total": 100,
+          "n_approved": 88,
+          "n_denied": 12,
+          "approval_rate": 0.88,
+          "avg_default_probability": 0.2638333333333333,
+          "actual_default_rate": 0.26,
+          "false_rejection_rate": 0.04054054054054054,
+          "false_approval_rate": 0.6538461538461539
+        }
+      ],
+      "disparate_impact_ratio": 0.9526135808500245,
+      "approval_rate_gap": 0.042173913043478284
+    },
+    "urban_rural": {
+      "groups": [
+        {
+          "group_col": "urban_rural",
+          "group": "Rural",
+          "n_total": 243,
+          "n_approved": 215,
+          "n_denied": 28,
+          "approval_rate": 0.8847736625514403,
+          "avg_default_probability": 0.2593141289437586,
+          "actual_default_rate": 0.25925925925925924,
+          "false_rejection_rate": 0.08333333333333333,
+          "false_approval_rate": 0.7936507936507936
+        },
+        {
+          "group_col": "urban_rural",
+          "group": "Semi-Urban",
+          "n_total": 290,
+          "n_approved": 255,
+          "n_denied": 35,
+          "approval_rate": 0.8793103448275862,
+          "avg_default_probability": 0.2719080459770115,
+          "actual_default_rate": 0.2620689655172414,
+          "false_rejection_rate": 0.056074766355140186,
+          "false_approval_rate": 0.6973684210526315
+        },
+        {
+          "group_col": "urban_rural",
+          "group": "Urban",
+          "n_total": 467,
+          "n_approved": 402,
+          "n_denied": 65,
+          "approval_rate": 0.860813704496788,
+          "avg_default_probability": 0.2820199857244825,
+          "actual_default_rate": 0.29978586723768735,
+          "false_rejection_rate": 0.04892966360856269,
+          "false_approval_rate": 0.65
+        }
+      ],
+      "disparate_impact_ratio": 0.9729196753149744,
+      "approval_rate_gap": 0.02395995805465234
+    },
+    "age_group": {
+      "groups": [
+        {
+          "group_col": "age_group",
+          "group": "18-25",
+          "n_total": 206,
+          "n_approved": 188,
+          "n_denied": 18,
+          "approval_rate": 0.912621359223301,
+          "avg_default_probability": 0.2584304207119741,
+          "actual_default_rate": 0.27184466019417475,
+          "false_rejection_rate": 0.02666666666666667,
+          "false_approval_rate": 0.75
+        },
+        {
+          "group_col": "age_group",
+          "group": "26-35",
+          "n_total": 333,
+          "n_approved": 285,
+          "n_denied": 48,
+          "approval_rate": 0.8558558558558559,
+          "avg_default_probability": 0.27647647647647644,
+          "actual_default_rate": 0.2702702702702703,
+          "false_rejection_rate": 0.07407407407407407,
+          "false_approval_rate": 0.6666666666666666
+        },
+        {
+          "group_col": "age_group",
+          "group": "36-45",
+          "n_total": 295,
+          "n_approved": 253,
+          "n_denied": 42,
+          "approval_rate": 0.8576271186440678,
+          "avg_default_probability": 0.28464406779661017,
+          "actual_default_rate": 0.3050847457627119,
+          "false_rejection_rate": 0.06829268292682927,
+          "false_approval_rate": 0.6888888888888889
+        },
+        {
+          "group_col": "age_group",
+          "group": "46-60",
+          "n_total": 166,
+          "n_approved": 146,
+          "n_denied": 20,
+          "approval_rate": 0.8795180722891566,
+          "avg_default_probability": 0.26684738955823295,
+          "actual_default_rate": 0.25903614457831325,
+          "false_rejection_rate": 0.056910569105691054,
+          "false_approval_rate": 0.6976744186046512
+        }
+      ],
+      "disparate_impact_ratio": 0.9377995016292888,
+      "approval_rate_gap": 0.056765503367445125
+    }
+  },
+  "alerts": [],
+  "dataset_name": "synthetic_alt_credit"
+}

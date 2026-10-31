@@ -1,0 +1,149 @@
+{
+  "dataset_name": "australian",
+  "file_path": "D:\\fairscore (1)\\fairscore\\data\\raw\\australian.dat",
+  "target_col": "feat_14",
+  "feature_cols": [
+    "feat_0",
+    "feat_1",
+    "feat_2",
+    "feat_3",
+    "feat_4",
+    "feat_5",
+    "feat_6",
+    "feat_7",
+    "feat_8",
+    "feat_9",
+    "feat_10",
+    "feat_11",
+    "feat_12",
+    "feat_13"
+  ],
+  "n_rows": 690,
+  "n_cols": 14,
+  "default_rate": 0.4449275362318841,
+  "model_version": "1.0.0",
+  "model_type": "RandomForestClassifier",
+  "timestamp": "2026-10-31T03:44:46.222802+00:00",
+  "test_metrics": {
+    "roc_auc": 0.9235682350436448,
+    "avg_precision": 0.8611278452560104,
+    "accuracy": 0.8260869565217391,
+    "precision": 0.7534246575342466,
+    "recall": 0.9016393442622951,
+    "f1": 0.8208955223880597,
+    "confusion_matrix": [
+      [
+        59,
+        18
+      ],
+      [
+        6,
+        55
+      ]
+    ],
+    "predicted_default_rate": 0.5289855072463768,
+    "actual_default_rate": 0.4420289855072464,
+    "approval_rate_at_0.35": 0.4420289855072464,
+    "approval_rate_at_0.5": 0.47101449275362317,
+    "approval_rate_at_0.65": 0.5942028985507246
+  },
+  "cv_metrics": {
+    "cv_roc_auc_mean": 0.931660163641641,
+    "cv_roc_auc_std": 0.020914024716370095,
+    "cv_f1_mean": 0.8473588374290664,
+    "cv_f1_std": 0.04158902300384992
+  },
+  "model_path": "D:\\fairscore (1)\\fairscore\\models\\australian_model.joblib",
+  "evaluation": {
+    "roc_auc": 0.9235682350436448,
+    "avg_precision": 0.8611278452560104,
+    "accuracy": 0.8260869565217391,
+    "precision": 0.7534246575342466,
+    "recall": 0.9016393442622951,
+    "f1": 0.8208955223880597,
+    "confusion_matrix": [
+      [
+        59,
+        18
+      ],
+      [
+        6,
+        55
+      ]
+    ],
+    "classification_report": {
+      "0": {
+        "precision": 0.9076923076923077,
+        "recall": 0.7662337662337663,
+        "f1-score": 0.8309859154929577,
+        "support": 77.0
+      },
+      "1": {
+        "precision": 0.7534246575342466,
+        "recall": 0.9016393442622951,
+        "f1-score": 0.8208955223880597,
+        "support": 61.0
+      },
+      "accuracy": 0.8260869565217391,
+      "macro avg": {
+        "precision": 0.8305584826132771,
+        "recall": 0.8339365552480307,
+        "f1-score": 0.8259407189405088,
+        "support": 138.0
+      },
+      "weighted avg": {
+        "precision": 0.8395015347963531,
+        "recall": 0.8260869565217391,
+        "f1-score": 0.8265256692654304,
+        "support": 138.0
+      }
+    },
+    "predicted_default_rate": 0.5289855072463768,
+    "actual_default_rate": 0.4420289855072464,
+    "approval_rate_at_0.35": 0.4420289855072464,
+    "approval_rate_at_0.5": 0.47101449275362317,
+    "approval_rate_at_0.65": 0.5942028985507246,
+    "calibration": {
+      "mean_predicted": [
+        0.052129629629629644,
+        0.15051282051282053,
+        0.2460606060606061,
+        0.32666666666666666,
+        0.4425,
+        0.5547222222222222,
+        0.6422222222222221,
+        0.7644444444444446,
+        0.8571794871794871,
+        0.9605555555555557
+      ],
+      "fraction_positive": [
+        0.027777777777777776,
+        0.0,
+        0.2727272727272727,
+        1.0,
+        0.25,
+        0.4166666666666667,
+        0.3333333333333333,
+        0.8,
+        1.0,
+        0.9166666666666666
+      ]
+    },
+    "feature_importance": [
+      {
+        "feature": "num__feat_0",
+        "importance": 0.041727380842481385
+      },
+      {
+        "feature": "num__feat_1",
+        "importance": 0.041727380842481385
+      }
+    ],
+    "cv_metrics": {
+      "cv_roc_auc_mean": 0.931660163641641,
+      "cv_roc_auc_std": 0.020914024716370095,
+      "cv_f1_mean": 0.8473588374290664,
+      "cv_f1_std": 0.04158902300384992
+    }
+  }
+}

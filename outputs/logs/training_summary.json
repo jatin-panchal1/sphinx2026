@@ -1,0 +1,366 @@
+[
+  {
+    "dataset_name": "default_of_credit_card_clients",
+    "file_path": "D:\\fairscore (1)\\fairscore\\data\\raw\\default of credit card clients.xls",
+    "target_col": "default payment next month",
+    "feature_cols": [
+      "ID",
+      "LIMIT_BAL",
+      "EDUCATION",
+      "MARRIAGE",
+      "AGE",
+      "PAY_0",
+      "PAY_2",
+      "PAY_3",
+      "PAY_4",
+      "PAY_5",
+      "PAY_6",
+      "BILL_AMT1",
+      "BILL_AMT2",
+      "BILL_AMT3",
+      "BILL_AMT4",
+      "BILL_AMT5",
+      "BILL_AMT6",
+      "PAY_AMT1",
+      "PAY_AMT2",
+      "PAY_AMT3",
+      "PAY_AMT4",
+      "PAY_AMT5",
+      "PAY_AMT6"
+    ],
+    "n_rows": 20000,
+    "n_cols": 24,
+    "default_rate": 0.2187,
+    "model_version": "1.0.0",
+    "model_type": "RandomForestClassifier",
+    "timestamp": "2026-10-31T03:43:14.591560+00:00",
+    "test_metrics": {
+      "roc_auc": 0.7709147428571428,
+      "avg_precision": 0.5409021631529398,
+      "accuracy": 0.817,
+      "precision": 0.6544276457883369,
+      "recall": 0.3462857142857143,
+      "f1": 0.452914798206278,
+      "confusion_matrix": [
+        [
+          2965,
+          160
+        ],
+        [
+          572,
+          303
+        ]
+      ],
+      "predicted_default_rate": 0.11575,
+      "actual_default_rate": 0.21875,
+      "approval_rate_at_0.35": 0.80225,
+      "approval_rate_at_0.5": 0.88425,
+      "approval_rate_at_0.65": 0.94225
+    },
+    "cv_metrics": {
+      "cv_roc_auc_mean": 0.7730122552104637,
+      "cv_roc_auc_std": 0.0030492087777251563,
+      "cv_f1_mean": 0.4519011233260062,
+      "cv_f1_std": 0.01618315560735848
+    },
+    "model_path": "D:\\fairscore (1)\\fairscore\\models\\default_of_credit_card_clients_model.joblib"
+  },
+  {
+    "dataset_name": "crx",
+    "file_path": "D:\\fairscore (1)\\fairscore\\data\\raw\\crx.data",
+    "target_col": "+",
+    "feature_cols": [
+      "b",
+      "30.83",
+      "feat_0",
+      "u",
+      "g",
+      "w",
+      "v",
+      "1.25",
+      "t",
+      "t.1",
+      "feat_01",
+      "f",
+      "g.1",
+      "feat_00202",
+      "0.1"
+    ],
+    "n_rows": 689,
+    "n_cols": 15,
+    "default_rate": 0.555878084179971,
+    "model_version": "1.0.0",
+    "model_type": "RandomForestClassifier",
+    "timestamp": "2026-10-31T03:43:36.068791+00:00",
+    "test_metrics": {
+      "roc_auc": 0.9109005748350011,
+      "avg_precision": 0.9121870670340757,
+      "accuracy": 0.8478260869565217,
+      "precision": 0.8888888888888888,
+      "recall": 0.8311688311688312,
+      "f1": 0.8590604026845637,
+      "confusion_matrix": [
+        [
+          53,
+          8
+        ],
+        [
+          13,
+          64
+        ]
+      ],
+      "predicted_default_rate": 0.5217391304347826,
+      "actual_default_rate": 0.5579710144927537,
+      "approval_rate_at_0.35": 0.4057971014492754,
+      "approval_rate_at_0.5": 0.4782608695652174,
+      "approval_rate_at_0.65": 0.5144927536231884
+    },
+    "cv_metrics": {
+      "cv_roc_auc_mean": 0.9270394524482448,
+      "cv_roc_auc_std": 0.02447824473519068,
+      "cv_f1_mean": 0.8814664889289237,
+      "cv_f1_std": 0.0355956166920003
+    },
+    "model_path": "D:\\fairscore (1)\\fairscore\\models\\crx_model.joblib"
+  },
+  {
+    "dataset_name": "german",
+    "file_path": "D:\\fairscore (1)\\fairscore\\data\\raw\\german.data",
+    "target_col": "1.1",
+    "feature_cols": [
+      "A11",
+      "feat_6",
+      "A34",
+      "A43",
+      "feat_1169",
+      "A65",
+      "A75",
+      "feat_4",
+      "A93",
+      "A101",
+      "4.1",
+      "A121",
+      "feat_67",
+      "A143",
+      "A152",
+      "feat_2",
+      "A173",
+      "feat_1",
+      "A192",
+      "A201"
+    ],
+    "n_rows": 999,
+    "n_cols": 20,
+    "default_rate": 0.3003003003003003,
+    "model_version": "1.0.0",
+    "model_type": "RandomForestClassifier",
+    "timestamp": "2026-10-31T03:43:55.236503+00:00",
+    "test_metrics": {
+      "roc_auc": 0.7851785714285713,
+      "avg_precision": 0.6180146664161975,
+      "accuracy": 0.74,
+      "precision": 0.6052631578947368,
+      "recall": 0.38333333333333336,
+      "f1": 0.46938775510204084,
+      "confusion_matrix": [
+        [
+          125,
+          15
+        ],
+        [
+          37,
+          23
+        ]
+      ],
+      "predicted_default_rate": 0.19,
+      "actual_default_rate": 0.3,
+      "approval_rate_at_0.35": 0.575,
+      "approval_rate_at_0.5": 0.81,
+      "approval_rate_at_0.65": 0.95
+    },
+    "cv_metrics": {
+      "cv_roc_auc_mean": 0.7879589756766014,
+      "cv_roc_auc_std": 0.04075593786943572,
+      "cv_f1_mean": 0.48263826061578874,
+      "cv_f1_std": 0.05976009985217466
+    },
+    "model_path": "D:\\fairscore (1)\\fairscore\\models\\german_model.joblib"
+  },
+  {
+    "dataset_name": "southgermancredit",
+    "file_path": "D:\\fairscore (1)\\fairscore\\data\\raw\\SouthGermanCredit.asc",
+    "target_col": "kredit",
+    "feature_cols": [
+      "laufkont",
+      "laufzeit",
+      "moral",
+      "verw",
+      "hoehe",
+      "sparkont",
+      "beszeit",
+      "rate",
+      "famges",
+      "buerge",
+      "wohnzeit",
+      "verm",
+      "alter",
+      "weitkred",
+      "wohn",
+      "bishkred",
+      "beruf",
+      "pers",
+      "telef",
+      "gastarb"
+    ],
+    "n_rows": 1000,
+    "n_cols": 20,
+    "default_rate": 0.3,
+    "model_version": "1.0.0",
+    "model_type": "RandomForestClassifier",
+    "timestamp": "2026-10-31T03:44:23.604603+00:00",
+    "test_metrics": {
+      "roc_auc": 0.7839285714285714,
+      "avg_precision": 0.6803351904388512,
+      "accuracy": 0.78,
+      "precision": 0.7857142857142857,
+      "recall": 0.36666666666666664,
+      "f1": 0.5,
+      "confusion_matrix": [
+        [
+          134,
+          6
+        ],
+        [
+          38,
+          22
+        ]
+      ],
+      "predicted_default_rate": 0.14,
+      "actual_default_rate": 0.3,
+      "approval_rate_at_0.35": 0.635,
+      "approval_rate_at_0.5": 0.86,
+      "approval_rate_at_0.65": 0.955
+    },
+    "cv_metrics": {
+      "cv_roc_auc_mean": 0.7869047619047618,
+      "cv_roc_auc_std": 0.03196819830625189,
+      "cv_f1_mean": 0.4746715990280347,
+      "cv_f1_std": 0.05811553852747292
+    },
+    "model_path": "D:\\fairscore (1)\\fairscore\\models\\southgermancredit_model.joblib"
+  },
+  {
+    "dataset_name": "australian",
+    "file_path": "D:\\fairscore (1)\\fairscore\\data\\raw\\australian.dat",
+    "target_col": "feat_14",
+    "feature_cols": [
+      "feat_0",
+      "feat_1",
+      "feat_2",
+      "feat_3",
+      "feat_4",
+      "feat_5",
+      "feat_6",
+      "feat_7",
+      "feat_8",
+      "feat_9",
+      "feat_10",
+      "feat_11",
+      "feat_12",
+      "feat_13"
+    ],
+    "n_rows": 690,
+    "n_cols": 14,
+    "default_rate": 0.4449275362318841,
+    "model_version": "1.0.0",
+    "model_type": "RandomForestClassifier",
+    "timestamp": "2026-10-31T03:44:46.222802+00:00",
+    "test_metrics": {
+      "roc_auc": 0.9235682350436448,
+      "avg_precision": 0.8611278452560104,
+      "accuracy": 0.8260869565217391,
+      "precision": 0.7534246575342466,
+      "recall": 0.9016393442622951,
+      "f1": 0.8208955223880597,
+      "confusion_matrix": [
+        [
+          59,
+          18
+        ],
+        [
+          6,
+          55
+        ]
+      ],
+      "predicted_default_rate": 0.5289855072463768,
+      "actual_default_rate": 0.4420289855072464,
+      "approval_rate_at_0.35": 0.4420289855072464,
+      "approval_rate_at_0.5": 0.47101449275362317,
+      "approval_rate_at_0.65": 0.5942028985507246
+    },
+    "cv_metrics": {
+      "cv_roc_auc_mean": 0.931660163641641,
+      "cv_roc_auc_std": 0.020914024716370095,
+      "cv_f1_mean": 0.8473588374290664,
+      "cv_f1_std": 0.04158902300384992
+    },
+    "model_path": "D:\\fairscore (1)\\fairscore\\models\\australian_model.joblib"
+  },
+  {
+    "dataset_name": "synthetic_alt_credit",
+    "file_path": "synthetic",
+    "target_col": "is_default",
+    "feature_cols": [
+      "monthly_income",
+      "income_volatility",
+      "rent_payment_score",
+      "utility_payment_score",
+      "mobile_recharge_regularity",
+      "cashflow_consistency",
+      "savings_rate",
+      "verified_cash_payments",
+      "months_in_current_job",
+      "num_dependants",
+      "expense_to_income_ratio",
+      "prior_defaults",
+      "loan_amount_requested",
+      "loan_to_income_ratio"
+    ],
+    "n_rows": 5000,
+    "n_cols": 14,
+    "default_rate": 0.2786,
+    "model_version": "1.0.0",
+    "model_type": "RandomForestClassifier",
+    "timestamp": "2026-10-31T03:45:26.421942+00:00",
+    "test_metrics": {
+      "roc_auc": 0.774337712953435,
+      "avg_precision": 0.5664843814995333,
+      "accuracy": 0.763,
+      "precision": 0.6640625,
+      "recall": 0.3046594982078853,
+      "f1": 0.4176904176904177,
+      "confusion_matrix": [
+        [
+          678,
+          43
+        ],
+        [
+          194,
+          85
+        ]
+      ],
+      "predicted_default_rate": 0.128,
+      "actual_default_rate": 0.279,
+      "approval_rate_at_0.35": 0.746,
+      "approval_rate_at_0.5": 0.872,
+      "approval_rate_at_0.65": 0.965
+    },
+    "cv_metrics": {
+      "cv_roc_auc_mean": 0.7519233086774944,
+      "cv_roc_auc_std": 0.014257934769075678,
+      "cv_f1_mean": 0.4019002991154295,
+      "cv_f1_std": 0.022690337166778755
+    },
+    "model_path": "D:\\fairscore (1)\\fairscore\\models\\synthetic_alt_credit_model.joblib"
+  }
+]
